@@ -1,0 +1,3113 @@
+import com.veloceapps.configurator.pml.loader.PropertyValueLoader;
+import com.veloceapps.configurator.pml.loader.PropertyDefaultValueLoader;
+import com.veloceapps.configurator.pml.loader.PropertyDefaultValueLoader;
+import com.veloceapps.configurator.pml.loader.HashTableDefaultValueLoader;
+import com.veloceapps.configurator.pml.customgoal.TableComponentGoalFactory;
+import com.veloceapps.cpq.model.initializers.SalesforceData;
+import com.veloceapps.cpq.model.initializers.SalesforceConstant;
+import com.veloceapps.cpq.model.initializers.SalesforceTable;
+import com.veloceapps.cpq.model.initializers.SalesforceHashData;
+import com.veloceapps.cpq.model.initializers.SalesforceHashTable;
+import com.veloceapps.cpq.model.initializers.SteelBrickPortDomainLoader;
+import com.veloceapps.cpq.model.initializers.SteelBrickProductOption;
+
+define CHANNEL_TYPES SalesforceTable("IDF_Table_Selection__c","channelType__c")
+define IDF_TABLE_SERIES SalesforceTable("IDF_Table_Selection__c","iDFTableSeries__c")
+define IDF_TABLES SalesforceTable("IDF_Table_Selection__c","iDFTable__c")
+define MCC_CODES SalesforceTable("Merchant_Category_Code__c","MCC_Code__c","MCC_Region__c = 'Canada' and MCC_CRequired__c = true ")
+define MCCDomian SalesforceTable("Merchant_Category_Code__c","MCC_Parent__c","MCC_Region__c = 'Canada'")
+define CUSTOMCOLUMN PropertyValueLoader()
+define EXTERNFIELD PropertyDefaultValueLoader()
+define EXCLUDEDDOMAIN SteelBrickPortDomainLoader()
+define CARD_MIX SalesforceData("Card_Mix__c","Name, Card_Type__c, MCC_Parent__c, of_Total_Volume__c")
+define DEFAULT_DISCOUNT SalesforceHashData("SBQQ__ProductOption__c","SBQQ__ConfiguredSKU__c, SBQQ__OptionalSKU__c","Discount_Rate__c, Disc_PI__c,SBQQ__Selected__c,SBQQ__Required__c,SBQQ__Number__c","SBQQ__ConfiguredSKU__r.velocpq__modelid__c = :modelId and SBQQ__OptionalSKU__r.velocpq__modelid__c = :modelId")
+define DEFAULT_UNIT_PRICE SalesforceHashData("PriceBookEntry","PriceBook2Id, ProductCode","UnitPrice","Product2.velocpq__modelid__c  = :modelId")
+define COMMISSIONRATE SalesforceConstant("Pricing_Cost_Assumption__c","Rate_Percent__c","Name = 'Commissions'")
+define COSTOFFUNDRATE SalesforceConstant("Pricing_Cost_Assumption__c","Rate_Percent__c","Name = 'CostofFunds'")
+define TXPROCESSRATE SalesforceConstant("Pricing_Cost_Assumption__c","Rate_Factor__c","Name = 'transaction processing'")
+define y2Growthrate SalesforceConstant("Pricing_Cost_Assumption__c","Year_2_Anual_growth_rate__c","Name = 'Account Specific'")
+define y3Growthrate SalesforceConstant("Pricing_Cost_Assumption__c","Year_3_Anual_growth_rate__c","Name = 'Account Specific'")
+define ACCOUNTOPENING SalesforceConstant("Pricing_Cost_Assumption__c","AccountOpening__c","Name = 'Account Specific'")
+define ACCOUNTMAINTENANCE SalesforceConstant("Pricing_Cost_Assumption__c","Account_Maintenance__c","Name = 'Account Specific'")
+define HELPDESK SalesforceConstant("Pricing_Cost_Assumption__c","HelpDesk__c","Name = 'Account Specific'")
+define POSSETUP SalesforceConstant("Pricing_Cost_Assumption__c","POS_Setup__c","Name = 'Account Specific'")
+define TERMINALMAINTENANCE SalesforceConstant("Pricing_Cost_Assumption__c","Terminal_Maintenance__c","Name = 'Account Specific'")
+define SECURITY SalesforceConstant("Pricing_Cost_Assumption__c","Security__c","Name = 'Account Specific'")
+define defaultProductLoader SteelBrickProductOption("DEFAULT_DISCOUNT")
+define defaultValueHashTableLoader HashTableDefaultValueLoader()
+
+extern int Locations__c = 10;
+extern int Contract_Term__c = 2;
+extern string SBQQ__PricebookId__c = "01s61000003QmysAAC";
+extern decimal(2) Ticket_Price_Average__c = 100;
+extern string Owner_Geography__c;
+extern string MOSS_Currency_Indicator__c;
+extern string CurrencyIsoCode;
+extern string MCC_Code__c;
+extern string Front_End_Vendor__c;
+extern string What_AMEX_Cardtype_will_Merchant_Accept__c;
+extern int internet;
+// US263247 & US263254
+extern int digitalEcommerce;
+// US263247 & US263254
+extern date CloseDate;
+extern string StageName;
+//DE112630
+extern string Sub_Stage__c;
+//DE112630
+extern int mOTO;
+//US338487
+extern string LOB__c;
+//US307362
+extern string Dispute_Letter_Delivery__c;
+//US351862
+extern string RepType;
+extern string ProfileName;
+
+@(split="true")
+type Card {
+	@(mapToField="SBQQ__ListPrice__c")
+	decimal(4) SBQQ__ListPrice__c = 0;
+	@(mapToField="SBQQ__ComponentCost__c")
+	decimal(4) SBQQ__ComponentCost__c = 0;
+	@(mapToField="SBQQ__ComponentListTotal__c")
+	decimal(4) SBQQ__ComponentListTotal__c = 0;
+	@(mapToField="SBQQ__ComponentTotal__c")
+	decimal(4) SBQQ__ComponentTotal__c = 0;
+	@(mapToField="SBQQ__CustomerPrice__c")
+	decimal(4) SBQQ__CustomerPrice__c = 0;
+	@(mapToField="SBQQ__NetPrice__c")
+	decimal(4) SBQQ__NetPrice__c = 0;
+	@(mapToField="SBQQ__PartnerPrice__c")
+	decimal(4) SBQQ__PartnerPrice__c = 0;
+	@(mapToField="SBQQ__ProrateMultiplier__c")
+	decimal(4) SBQQ__ProrateMultiplier__c = 1;
+	@(mapToField="SBQQ__ProratedListPrice__c")
+	decimal(4) SBQQ__ProratedListPrice__c = 0;
+	@(mapToField="SBQQ__ProratedPrice__c")
+	decimal(4) SBQQ__ProratedPrice__c = 0;
+	@(mapToField="SBQQ__RegularPrice__c")
+	decimal(4) SBQQ__RegularPrice__c = 0;
+	@(mapToField="SBQQ__SpecialPrice__c")
+	decimal(4) SBQQ__SpecialPrice__c = 0;
+	@(mapToField="SBQQ__UpliftAmount__c")
+	decimal(4) SBQQ__UpliftAmount__c = 0;
+	@(readProp="#description", displayName="Product Description", isVisible="true", uiOrder="0")
+	string productDescription = this.getProperty("#description");
+	@(column="Processing_Method__c")
+	string Processing_Method__c;
+	decimal(4) cardTypeAnnualSales = parent(annualSales);
+	int cardTypeAnnualTransactions = parent(annualTransactions);
+	decimal(6) cardreturnsPercentage = parent(returnsPercentage);
+	@(column="of_Total_Volume__c")
+	decimal(4) mixPercentage = [0..100];
+	@(isEditable="true", mapToField="Sales__c", displayName="Card Annual Sales", isVisible="true", uiOrder="1")
+	decimal(4) cardAnnualSales = cardTypeAnnualSales*mixPercentage/100;
+	@(isEditable="true", mapToField="Transaction__c", displayName="Card Annual Transactions", isVisible="true", uiOrder="2")
+	int cardAnnualTransactions = ceil(cardTypeAnnualTransactions*mixPercentage/100);
+	decimal(4) cardAnnualReturns = cardTypeAnnualSales*returnsPercentage*mixPercentage/100;
+	@(mapToField="Return_Transaction__c")
+	decimal(4) cardAnnualReturnTransactions = cardAnnualTransactions*returnsPercentage/100;
+	decimal(4) cardNetAnnualSales = cardTypeAnnualSales*mixPercentage/100*(1-(returnsPercentage/100));
+	string tableName = parent(iDFTable);
+	string productCode = this.getProperty("#productCode");
+	int productCodeLen = strlen(productCode);
+	int endIndex = (productCodeLen>4)?(productCodeLen-4):productCodeLen;
+	string ComboParent = this.substring(productCode,0,endIndex);
+	decimal(4) scgDiscountRate = [0..50];
+	decimal(4) scgDiscountPI = [0..5];
+	decimal(4) icgDiscountRate = [0..50];
+	decimal(4) icgDiscountPI = [0..5];
+	string MCCParent = parent(MCCParent);
+	decimal(2) returnsPercentage = parent(returnsPercentage);
+	@(mapToField="Return__c")
+	decimal(4) Return__c = cardTypeAnnualSales*returnsPercentage*mixPercentage/100;
+	boolean cnp = this.contains(ComboParent,"CNP");
+	decimal(4) cnpSales = cnp?cardAnnualSales:0;
+	boolean skipSCG = parent(skipSCG);
+	decimal(4) scgRevenue = (skipSCG)?0:(cardAnnualSales*scgDiscountRate/100+cardAnnualTransactions*scgDiscountPI);
+	decimal(4) icgCost = (cardAnnualSales*icgDiscountRate/100+cardAnnualTransactions*icgDiscountPI)*(1-returnsPercentage/100);
+	decimal(4) discountRate = parent(discountRate);
+	decimal(4) discountPI = parent(discountPI);
+	@(mapToField="Discount_Revenue__c")
+	decimal(4) Discount_Revenue__c = discountRate/100*cardAnnualSales;
+	@(mapToField="Discount_PI_Rev__c")
+	decimal(4) Discount_PI_Rev__c = discountPI*cardAnnualTransactions;
+	@(mapToField="SCG__c")
+	decimal(4) SCG__c = cardAnnualSales*scgDiscountRate/100;
+	@(mapToField="SCG_PI__c")
+	decimal(4) SCG_PI__c = cardAnnualTransactions*scgDiscountPI;
+	@(mapToField="Assessments__c")
+	decimal(4) Assessments__c = [0..MAX_DECIMAL];
+	@(mapToField="MC_License_Fee__c")
+	decimal(4) MC_License_Fee__c = [0..MAX_DECIMAL];
+	@(mapToField="IDP_SF__c")
+	decimal(4) IDP_SF__c = [0..MAX_DECIMAL];
+	string parentName = parent(typeName);
+	@(mapToField="FDB_Volume__c")
+	decimal(4) FDB_Volume__c = cardAnnualSales;
+	@(mapToField="FDB_Transactions__c")
+	decimal(4) FDB_Transactions__c = (Processing_Method__c=="Both"&&parentName!="china_up_can")?(cardAnnualTransactions*(1+returnsPercentage/100)):0;
+	@(mapToField="FDB_Amount__c")
+	decimal(4) FDB_Amount__c = Discount_Revenue__c+Discount_PI_Rev__c+SCG__c+SCG_PI__c+Assessments__c+MC_License_Fee__c+IDP_SF__c;
+	@(mapToField="FDB_CP__c")
+	decimal(4) FDB_CP__c = (Processing_Method__c=="CP")?((FDB_Amount__c/FDB_Volume__c)*100):0;
+	@(mapToField="FDB_CNP__c")
+	decimal(4) FDB_CNP__c = (Processing_Method__c=="CNP")?((FDB_Amount__c/FDB_Volume__c)*100):0;
+	@(mapToField="FDB_Both__c")
+	decimal(4) FDB_Both__c = (Processing_Method__c=="Both")?(FDB_Amount__c/FDB_Transactions__c):0;
+	@(mapToField="FDB_Both_Percent__c")
+	decimal(4) FDB_Both_Percent__c = (Processing_Method__c=="Both"&&parentName=="china_up_can")?((FDB_Amount__c/FDB_Volume__c)*100):0;
+
+	@(userKeys="tableName,ComboParent,MCCParent")
+	preference(table(tableName,ComboParent,MCCParent,scgDiscountRate,scgDiscountPI,SalesforceHashTable("IDF_Calc__c","name, ComboParent__c, MCC_Parent__C","DiscountRate__c, PerItemRate__c","name like 'A%' or name like 'B%' or name like 'H%' or name like 'T%' or name like 'E%' or name like 'G%' or name like 'M%' or name like 'S%' or name like 'T%' or name = 'ZZ' or name = 'N'")));
+	@(userKeys="ComboParent,MCCParent")
+	preference(table(ComboParent,MCCParent,icgDiscountRate,icgDiscountPI,SalesforceHashTable("ICG__c","ComboParent__c, MCC_Parent__C","DiscountRate__c, PerItemRate__c")));
+}
+
+type Credit : Card {}
+
+type XBCredit : Credit {}
+
+type Debit : Card {}
+
+type AMEX_CNP_CAN : Credit {
+	decimal(4) amex_optblue_assessment_canTotalRevenue = parent(amex_optblue_assessment_canTotalRevenue);
+	decimal(4) amex_optblue_cnp_canDiscountrate = parent(amex_optblue_cnp_canDiscountrate);
+	decimal(4) Assessments__c = (amex_optblue_assessment_canTotalRevenue*mixPercentage/100)+(amex_optblue_cnp_canDiscountrate/100*cardAnnualSales);
+}
+
+type AMEX_CP_CAN : Credit {
+	decimal(4) amex_optblue_assessment_canTotalRevenue = parent(amex_optblue_assessment_canTotalRevenue);
+	decimal(4) Assessments__c = amex_optblue_assessment_canTotalRevenue*mixPercentage/100;
+}
+
+type CUP_CNP_CAN : Credit {}
+
+type CUP_CP_CAN : Credit {}
+
+type DiscoverCredit : Credit {
+	decimal(4) discover_assessment_canTotalRevenue = parent(discover_assessment_canTotalRevenue);
+	decimal(4) Assessments__c = discover_assessment_canTotalRevenue*mixPercentage/100;
+}
+
+type DISC_CNP_CAN : DiscoverCredit {}
+
+type DISC_CP_CAN : DiscoverCredit {}
+
+type DISCB_CNP_CAN : DiscoverCredit {}
+
+type DISCB_CP_CAN : DiscoverCredit {}
+
+type DISCPP_CNP_CAN : DiscoverCredit {}
+
+type DISCPP_CP_CAN : DiscoverCredit {}
+
+type JCB_CNP_CAN : Credit {
+	decimal(4) JCB_optblue_network_canTotalRevenue = parent(JCB_optblue_network_canTotalRevenue);
+	decimal(4) JCB_optblue_cnp_canDiscountrate = parent(JCB_optblue_cnp_canDiscountrate);
+	decimal(4) Assessments__c = (JCB_optblue_network_canTotalRevenue*mixPercentage/100)+(JCB_optblue_cnp_canDiscountrate/100*cardAnnualSales);
+}
+
+type JCB_CP_CAN : Credit {
+	decimal(4) JCB_optblue_network_canTotalRevenue = parent(JCB_optblue_network_canTotalRevenue);
+	decimal(4) Assessments__c = (JCB_optblue_network_canTotalRevenue*mixPercentage/100);
+}
+
+type MasterCredit : Credit {
+	decimal(4) mastercard_assessment_canTotalRevenue = parent(mastercard_assessment_canTotalRevenue);
+	decimal(4) mastercard_license_fee_canTotalRevenue = parent(mastercard_license_fee_canTotalRevenue);
+	decimal(4) Assessments__c = mastercard_assessment_canTotalRevenue*mixPercentage/100;
+	decimal(4) MC_License_Fee__c = mastercard_license_fee_canTotalRevenue*mixPercentage/100;
+}
+
+type MCBS_CNP_CAN : MasterCredit {}
+
+type MCBS_CP_CAN : MasterCredit {}
+
+type MCCS_CNP_CAN : MasterCredit {}
+
+type MCCS_CP_CAN : MasterCredit {}
+
+type MCHS_CNP_CAN : MasterCredit {}
+
+type MCHS_CP_CAN : MasterCredit {}
+
+type MCHV_CNP_CAN : MasterCredit {}
+
+type MCHV_CP_CAN : MasterCredit {}
+
+type MCPP_CNP_CAN : MasterCredit {}
+
+type MCPP_CP_CAN : MasterCredit {}
+
+type VisaCredit : Credit {
+	decimal(4) visa_assessment_canTotalRevenue = parent(visa_assessment_canTotalRevenue);
+	decimal(4) Assessments__c = visa_assessment_canTotalRevenue*mixPercentage/100;
+}
+
+type VPVL_CP_CAN : VisaCredit {}
+
+type VIBS_CNP_CAN : VisaCredit {}
+
+type VIBS_CP_CAN : VisaCredit {}
+
+type VIBSP_CNP_CAN : VisaCredit {}
+
+type VIBSP_CP_CAN : VisaCredit {}
+
+type VINF_CNP_CAN : VisaCredit {}
+
+type VINF_CP_CAN : VisaCredit {}
+
+type VINFP_CNP_CAN : VisaCredit {}
+
+type VINFP_CP_CAN : VisaCredit {}
+
+type VIPP_CNP_CAN : VisaCredit {}
+
+type VIPP_CP_CAN : VisaCredit {}
+
+type VISA_CNP_CAN : VisaCredit {}
+
+type VISA_CP_CAN : VisaCredit {}
+
+type VPVL_CNP_CAN : VisaCredit {}
+
+type MCDB_CNP_CAN : Debit {}
+
+type MCDB_CP_CAN : Debit {}
+
+type DISCD_CNP_CAN : Debit {}
+
+type DISCD_CP_CAN : Debit {}
+
+type IDPDebit : Debit {
+	decimal(4) IDPFeeTotalRevenue = parent(IDPFeeTotalRevenue);
+	decimal(4) IDP_SF__c = IDPFeeTotalRevenue*mixPercentage/100;
+}
+
+type IDP_CNP_CAN : IDPDebit {}
+
+type IDP_CP_CAN : IDPDebit {}
+
+type IDPF_CNP_CAN : IDPDebit {}
+
+type IDPF_CP_CAN : IDPDebit {}
+
+type VIDB_CNP_CAN : Debit {}
+
+type VIDB_CP_CAN : Debit {}
+
+type AMEX_FGN_CAN : XBCredit {
+	decimal(4) amex_optblue_assessment_canTotalRevenue = parent(amex_optblue_assessment_canTotalRevenue);
+	decimal(4) Assessments__c = amex_optblue_assessment_canTotalRevenue*mixPercentage/100;
+}
+
+type DISC_FGN_CAN : XBCredit {
+	decimal(4) discover_assessment_canTotalRevenue = parent(discover_assessment_canTotalRevenue);
+	decimal(4) Assessments__c = discover_assessment_canTotalRevenue*mixPercentage/100;
+}
+
+type MCCS_FGN_CAN : XBCredit {
+	decimal(4) mastercard_assessment_canTotalRevenue = parent(mastercard_assessment_canTotalRevenue);
+	decimal(4) mastercard_license_fee_canTotalRevenue = parent(mastercard_license_fee_canTotalRevenue);
+	decimal(4) Assessments__c = mastercard_assessment_canTotalRevenue*mixPercentage/100;
+	decimal(4) MC_License_Fee__c = mastercard_license_fee_canTotalRevenue*mixPercentage/100;
+}
+
+type VISA_FGN_CAN : XBCredit {
+	decimal(4) visa_assessment_canTotalRevenue = parent(visa_assessment_canTotalRevenue);
+	decimal(4) Assessments__c = visa_assessment_canTotalRevenue*mixPercentage/100;
+}
+
+@(split="true", defaultValueLoader="defaultValueHashTableLoader", userKeys="bundleId,productId", source="DEFAULT_DISCOUNT")
+type CardType {
+	@(mapToField="SBQQ__ListPrice__c")
+	decimal(4) SBQQ__ListPrice__c = 0;
+	@(mapToField="SBQQ__ComponentCost__c")
+	decimal(4) SBQQ__ComponentCost__c = 0;
+	@(mapToField="SBQQ__ComponentListTotal__c")
+	decimal(4) SBQQ__ComponentListTotal__c = 0;
+	@(mapToField="SBQQ__ComponentTotal__c")
+	decimal(4) SBQQ__ComponentTotal__c = 0;
+	@(mapToField="SBQQ__CustomerPrice__c")
+	decimal(4) SBQQ__CustomerPrice__c = 0;
+	@(mapToField="SBQQ__NetPrice__c")
+	decimal(4) SBQQ__NetPrice__c = 0;
+	@(mapToField="SBQQ__PartnerPrice__c")
+	decimal(4) SBQQ__PartnerPrice__c = 0;
+	@(mapToField="SBQQ__ProrateMultiplier__c")
+	decimal(4) SBQQ__ProrateMultiplier__c = 1;
+	@(mapToField="SBQQ__ProratedListPrice__c")
+	decimal(4) SBQQ__ProratedListPrice__c = 0;
+	@(mapToField="SBQQ__ProratedPrice__c")
+	decimal(4) SBQQ__ProratedPrice__c = 0;
+	@(mapToField="SBQQ__RegularPrice__c")
+	decimal(4) SBQQ__RegularPrice__c = 0;
+	@(mapToField="SBQQ__SpecialPrice__c")
+	decimal(4) SBQQ__SpecialPrice__c = 0;
+	@(mapToField="SBQQ__UpliftAmount__c")
+	decimal(4) SBQQ__UpliftAmount__c = 0;
+	string bundleId = parent(bundleId);
+	string productId = this.getProperty("#productId");
+	string typeName = this.typeName;
+	@(readProp="#description", displayName="Product Description", flex="1", isVisible="true", uiOrder="1")
+	string productDescription = this.getProperty("#description");
+	@(isEditable="true", mapToField="Annual_Sales__c", displayName="Annual Sales", uiFormat="integer", defaultvalue="1000", isVisible="true", align="right", uiOrder="2")
+	decimal(0) annualSales = [0..MAX_DECIMAL];
+	@(isEditable="true", defaultValueSelectMode="0", displayName="ATS", defaultValueLoader="EXTERNFIELD", uiFormat="decimal", column="Ticket_Price_Average__c", isVisible="true", align="right", uiOrder="3", configurable="false")
+	decimal(4) averageTicketSize;
+	@(mapToField="Annual_transactions__c", defaultValueSelectMode="0", displayName="Annual Transactions", uiFormat="integer", isVisible="true", align="right", uiOrder="4")
+	int annualTransactions = (averageTicketSize>0&&(averageTicketSize<annualSales||averageTicketSize==annualSales))?ceil(annualSales/averageTicketSize):0;
+	@(isMassEditable="true", mapToField="Discount_Rate__c", isEditable="true", defaultValueSelectMode="0", displayName="Discount Rate %", column="Discount_Rate__c", isVisible="true", align="right", uiOrder="5")
+	decimal(4) discountRate = [0..10];
+	@(isMassEditable="true", mapToField="Disc_PI__c", isEditable="true", defaultValueSelectMode="0", displayName="Discount PI", column="Disc_PI__c", isVisible="true", align="right", uiOrder="6")
+	decimal(4) discountPI = [0..10];
+	@(isEditable="true", defaultValueSelectMode="0", displayName="Refund %", defaultvalue="0", isVisible="true", align="right", uiOrder="7")
+	decimal(2) returnsPercentage = [0..100];
+	string cardType;
+	@(column="Min_Max_Validation_Required__c")
+	boolean minMaxValidationRequired;
+	@(column="Minimum_Discount_Rate__c")
+	decimal(4) minDiscountRate = [0..10];
+	@(column="Maximum_Discount_Rate__c")
+	decimal(4) maxDiscountRate = [0..10];
+	string parentBundleName = parent(bundleName);
+	@(column="Minimum_Disc_PI__c")
+	decimal(4) minDiscountPI = [0..10];
+	@(column="Maximum_Disc_PI__c")
+	decimal(4) maxDiscountPI = [0..10];
+	//string discountPIMsg = "ERR#05;"+productDescription+" Discount PI must  be between "+minDiscountPI+" and "+maxDiscountPI;
+	string discountPIMsg = "ERR#05;"+productDescription+" Discount PI must be between 0 and 10";
+	//US342262
+	boolean discountRateViolated = minMaxValidationRequired&&(minDiscountRate!=maxDiscountRate)&&(parentBundleName!="MPOS Bundle")&&((discountRate<minDiscountRate)||(discountRate>maxDiscountRate));
+	string discountMsgMPOS = "E;discountRate;"+productDescription+" Discount Rate % should be between 2.45% and 10%";
+	string discountMsgMCVC100PercentFlatRate = "E;discountRate;"+productDescription+" Discount Rate % should be between 1.85% and 10%";
+	//US338486
+	string discountMsgDiscoverAMEXJCB100PercentFlatRate = "E;discountRate;"+productDescription+" Discount Rate % should be between 2.00% and 10%";
+	//US338486
+	string IDF_Table_Series_Parent = parent(iDFTableSeries);
+	string pricingMethod = parent(pricingMethod);
+	decimal(6) totalPercent = (pricingMethod=="Plus Return")?(1+returnsPercentage/100):((pricingMethod=="Zero Return")?1:(1-returnsPercentage/100));
+	decimal(4) creditSales = Cards.totalCreditSales;
+	int creditTransactions = Cards.totalCreditTransactions;
+	decimal(4) creditRevenue = (creditSales*discountRate/100+creditTransactions*discountPI)*totalPercent;
+	decimal(4) creditNetSales = Cards.totalCreditNetSales;
+	decimal(4) debitSales = Cards.totalDebitSales;
+	int debitTransactions = Cards.totalDebitTransactions;
+	decimal(4) debitRevenue = (debitSales*discountRate/100+debitTransactions*discountPI)*totalPercent;
+	decimal(4) annualXBSales = Cards.totalXBSales;
+	decimal(4) annualCNPSales = Cards.totalCNPSales;
+	decimal(4) creditICGCost = Cards.totalCreditICGCost;
+	decimal(4) creditNetRevenue = creditRevenue+Cards.totalCreditSCGRevenue-Cards.totalCreditICGCost;
+	decimal(4) debitNetRevenue = debitRevenue+Cards.totalDebitSCGRevenue-Cards.totalDebitICGCost;
+	string MCCParent = parent(MCCParent);
+
+	@(filter="MCCParent == MCC_Parent__c && cardType == Card_Type__c", product="Name", goalfactory="TableComponentGoalFactory", source="CARD_MIX", PropagateUp="true", key="#productCode")
+	port Cards : Card [0..50] {
+		totalCreditSales = sum(Credit.cardAnnualSales);
+		totalCreditNetSales = sum(Credit.cardNetAnnualSales);
+		totalCreditTransactions = sum(Credit.cardAnnualTransactions);
+		totalCreditReturns = sum(Credit.cardAnnualReturns);
+		totalCreditSCGRevenue = sum(Credit.scgRevenue);
+		totalCreditICGCost = sum(Credit.icgCost);
+		totalXBSales = sum(XBCredit.cardAnnualSales);
+		totalDebitSales = sum(Debit.cardAnnualSales);
+		totalDebitTransactions = sum(Debit.cardAnnualTransactions);
+		totalDebitSCGRevenue = sum(Debit.scgRevenue);
+		totalDebitICGCost = sum(Debit.icgCost);
+		totalCNPSales = sum(cnpSales);
+	}
+
+
+	//message(minDiscountPI!=maxDiscountPI&&(discountPI<minDiscountPI||discountPI>maxDiscountPI), discountPIMsg);
+	message((discountPI<0||discountPI>10),discountPIMsg);
+	//US342262
+	message(discountRateViolated==true,"ERR#04;Discount Rate (%) applied to Card Products marked with [?] are outside of the defined thresholds. You may review the rates.");
+	message(annualSales==0.0,"ERR#06;Please enter value for Annual Sales");
+	message(averageTicketSize==null,"ERR#03;Please enter value for ATS");
+	message(annualSales>0&&(averageTicketSize<=0||averageTicketSize>annualSales),"ERR#07;ATS should be between 0 and annualSales");
+}
+
+type VisaCard : CardType {
+	message(discountRate==0&&discountPI==0,"ERR#09;Either Discount Rate or Discount PI must be greater than 0 for selected Card Type");
+}
+
+type visa_credit_can : VisaCard {
+	string cardType = "VISA";
+
+	message(Owner_Geography__c=="Canada"&&parentBundleName=="MPOS Bundle"&&(discountRate<2.45||discountRate>10),discountMsgMPOS);
+	message(Owner_Geography__c=="Canada"&&parentBundleName=="100% Card-Present Flat Rate"&&(discountRate<1.85||discountRate>10),discountMsgMCVC100PercentFlatRate);
+}
+
+type visa_debit_can : VisaCard {
+	string cardType = "VISADEBIT";
+
+	message(Owner_Geography__c=="Canada"&&parentBundleName=="MPOS Bundle"&&(discountRate<2.45||discountRate>10),discountMsgMPOS);
+	message(Owner_Geography__c=="Canada"&&parentBundleName=="100% Card-Present Flat Rate"&&(discountRate<1.85||discountRate>10),discountMsgMCVC100PercentFlatRate);
+}
+
+type visa_corp_can : VisaCard {
+	string cardType = "VISACORP";
+
+	constraint(annualSales==0,"Corp Card should not have Annual sales or Annual transaction");
+	constraint(annualTransactions==0,"Corp Card should not have Annual sales or Annual transaction");
+}
+
+type MasterCard : CardType {
+	message(discountRate==0&&discountPI==0,"ERR#09;Either Discount Rate or Discount PI must be greater than 0 for selected Card Type");
+}
+
+type mastercard_credit_can : MasterCard {
+	string cardType = "MASTERCARD";
+
+	message(Owner_Geography__c=="Canada"&&parentBundleName=="MPOS Bundle"&&(discountRate<2.45||discountRate>10),discountMsgMPOS);
+	message(Owner_Geography__c=="Canada"&&parentBundleName=="100% Card-Present Flat Rate"&&(discountRate<1.85||discountRate>10),discountMsgMCVC100PercentFlatRate);
+}
+
+type mastercard_debit_can : MasterCard {
+	string cardType = "MASTERCARDDEBIT";
+
+	message(Owner_Geography__c=="Canada"&&parentBundleName=="MPOS Bundle"&&(discountRate<2.45||discountRate>10),discountMsgMPOS);
+	message(Owner_Geography__c=="Canada"&&parentBundleName=="100% Card-Present Flat Rate"&&(discountRate<1.85||discountRate>10),discountMsgMCVC100PercentFlatRate);
+}
+
+type mc_corp_can : MasterCard {
+	string cardType = "MASTERCARDCORP";
+
+	constraint(annualSales==0,"Corp Card should not have Annual sales or Annual transaction");
+	constraint(annualTransactions==0,"Corp Card should not have Annual sales or Annual transaction");
+}
+
+type DiscoveryCard : CardType {
+	message(discountRate==0&&discountPI==0,"ERR#09;Either Discount Rate or Discount PI must be greater than 0 for selected Card Type");
+}
+
+@(disableCardinalityConstraint="true")
+type discover_can : DiscoveryCard {
+	string cardType = "DISCOVER";
+
+	message(Owner_Geography__c=="Canada"&&parentBundleName=="MPOS Bundle"&&(discountRate<2.45||discountRate>10),discountMsgMPOS);
+	message(Owner_Geography__c=="Canada"&&parentBundleName=="100% Card-Present Flat Rate"&&(discountRate<2.00||discountRate>10),discountMsgDiscoverAMEXJCB100PercentFlatRate);
+}
+
+type discover_comm_can : DiscoveryCard {
+	string cardType = "DISCOVERCORP";
+
+	message(Owner_Geography__c=="Canada"&&parentBundleName=="MPOS Bundle"&&(discountRate<2.45||discountRate>10),discountMsgMPOS);
+	message(Owner_Geography__c=="Canada"&&parentBundleName=="100% Card-Present Flat Rate"&&(discountRate<2.00||discountRate>10),discountMsgDiscoverAMEXJCB100PercentFlatRate);
+}
+
+type discover_comm_can_usd : DiscoveryCard {
+	string cardType = "DISCOVERCORP";
+
+	message(Owner_Geography__c=="Canada"&&parentBundleName=="MPOS Bundle"&&(discountRate<2.45||discountRate>10),discountMsgMPOS);
+	message(Owner_Geography__c=="Canada"&&parentBundleName=="100% Card-Present Flat Rate"&&(discountRate<2.00||discountRate>10),discountMsgDiscoverAMEXJCB100PercentFlatRate);
+}
+
+type AMEXJCBCard : CardType {
+	port Cards : Card [0..50] {
+		totalCNPSales = sum(cnpSales);
+	}
+
+
+	message(discountRate==0&&discountPI==0,"ERR#09;Either Discount Rate or Discount PI must be greater than 0 for selected Card Type");
+}
+
+type jcb_optblue_can : AMEXJCBCard {
+	string cardType = "JCB";
+
+	message(Owner_Geography__c=="Canada"&&parentBundleName!="MPOS Bundle"&&annualSales>1000000,"ERR#10;productDescription;JCB OptBlue card cannot be order for volume > $1,000,000");
+	//US290710
+	message(Owner_Geography__c=="Canada"&&parentBundleName=="MPOS Bundle"&&(discountRate<2.45||discountRate>10),discountMsgMPOS);
+	message(Owner_Geography__c=="Canada"&&parentBundleName=="100% Card-Present Flat Rate"&&(discountRate<2.00||discountRate>10),discountMsgDiscoverAMEXJCB100PercentFlatRate);
+}
+
+type amex_optblue_can : AMEXJCBCard {
+	string cardType = "AMEX";
+
+	message(Owner_Geography__c=="Canada"&&parentBundleName!="MPOS Bundle"&&annualSales>1000000,"ERR#11;productDescription;Amex OptBlue card cannot be order for volume > $1,000,000");
+	//US290710
+	message(Owner_Geography__c=="Canada"&&parentBundleName=="MPOS Bundle"&&(discountRate<2.45||discountRate>10),discountMsgMPOS);
+	message(Owner_Geography__c=="Canada"&&parentBundleName=="100% Card-Present Flat Rate"&&(discountRate<2.00||discountRate>10),discountMsgDiscoverAMEXJCB100PercentFlatRate);
+}
+
+type china_up_can : CardType {
+	string cardType = "UNIONPAY";
+	string discMsgUNIONPAY100PercentFlatRate = "E;discountPI;"+productDescription+" Discount Rate % should be between 1.30% and 10%";
+
+	//US338486
+	message(Owner_Geography__c=="Canada"&&discountRate<1.2,"W;discountRate;Rate cannot be less than 1.20% for Union Pay");
+	message(Owner_Geography__c=="Canada"&&parentBundleName=="100% Card-Present Flat Rate"&&(discountRate<1.30||discountRate>10),discMsgUNIONPAY100PercentFlatRate);
+	//US338486
+	message(discountRate==0&&discountPI==0,"ERR#09;Either Discount Rate or Discount PI must be greater than 0 for selected Card Type");
+}
+
+type interac_can : CardType {
+	string cardType = "INTERAC";
+	//string discMsgInteracMPOS = "E;discountRate;"+productDescription+" Discount Rate % should be between 0% and 5%";
+	string discPIMsgInteracMPOS = "E;discountPI;"+productDescription+" Discount PI should be between $0.07 and $10";
+	//US342262,DE115470
+	string discMsgPIInterac100PercentFlatRate = "E;discountPI;"+productDescription+" Discount PI should be between $0.07 and $5";
+
+	//US342262
+	//message(Owner_Geography__c=="Canada"&&parentBundleName=="MPOS Bundle"&&(discountRate<0||discountRate>5), discMsgInteracMPOS);
+	message(Owner_Geography__c=="Canada"&&parentBundleName=="MPOS Bundle"&&(discountPI<0.07||discountPI>10)&&(!((RepType!=null&&RepType=="DSR")&&ProfileName=="CA GPN Sales")),discPIMsgInteracMPOS);
+	//US338486
+	message(Owner_Geography__c=="Canada"&&parentBundleName=="100% Card-Present Flat Rate"&&(discountPI<0.07||discountPI>5)&&(!((RepType!=null&&RepType=="DSR")&&ProfileName=="CA GPN Sales")),discMsgPIInterac100PercentFlatRate);
+	//US338486,DE115470
+	message(discountRate==0&&discountPI==0&&(!((RepType!=null&&RepType=="DSR")&&ProfileName=="CA GPN Sales")),"ERR#09;Either Discount Rate or Discount PI must be greater than 0 for selected Card Type");
+	//US392024
+	message(Owner_Geography__c=="Canada"&&parentBundleName=="100% Card-Present Flat Rate"&&(discountPI<0||discountPI>5)&&((RepType!=null&&RepType=="DSR")&&ProfileName=="CA GPN Sales"),"Discount PI should be between $0 and $5");
+}
+
+@(split="true", defaultValueLoader="defaultValueHashTableLoader", userKeys="bundleId,productId", source="DEFAULT_DISCOUNT")
+type AssessmentFee {
+	@(mapToField="SBQQ__ListPrice__c")
+	decimal(4) SBQQ__ListPrice__c = 0;
+	@(mapToField="SBQQ__ComponentCost__c")
+	decimal(4) SBQQ__ComponentCost__c = 0;
+	@(mapToField="SBQQ__ComponentListTotal__c")
+	decimal(4) SBQQ__ComponentListTotal__c = 0;
+	@(mapToField="SBQQ__ComponentTotal__c")
+	decimal(4) SBQQ__ComponentTotal__c = 0;
+	@(mapToField="SBQQ__CustomerPrice__c")
+	decimal(4) SBQQ__CustomerPrice__c = 0;
+	@(mapToField="SBQQ__NetPrice__c")
+	decimal(4) SBQQ__NetPrice__c = 0;
+	@(mapToField="SBQQ__PartnerPrice__c")
+	decimal(4) SBQQ__PartnerPrice__c = 0;
+	@(mapToField="SBQQ__ProrateMultiplier__c")
+	decimal(4) SBQQ__ProrateMultiplier__c = 1;
+	@(mapToField="SBQQ__ProratedListPrice__c")
+	decimal(4) SBQQ__ProratedListPrice__c = 0;
+	@(mapToField="SBQQ__ProratedPrice__c")
+	decimal(4) SBQQ__ProratedPrice__c = 0;
+	@(mapToField="SBQQ__RegularPrice__c")
+	decimal(4) SBQQ__RegularPrice__c = 0;
+	@(mapToField="SBQQ__SpecialPrice__c")
+	decimal(4) SBQQ__SpecialPrice__c = 0;
+	@(mapToField="SBQQ__UpliftAmount__c")
+	decimal(4) SBQQ__UpliftAmount__c = 0;
+	string bundleId = parent(bundleId);
+	string productId = this.getProperty("#productId");
+	@(readProp="#description", displayName="Product Description", flex="1", isVisible="true", uiOrder="0")
+	string productDescription = this.getProperty("#description");
+	@(mapToField="Discount_Rate__c", isEditable="true", displayName="Discount Rate %", column="Discount_Rate__c", isVisible="true", align="right", uiOrder="1")
+	decimal(4) discountRate = [0..10];
+	@(mapToField="Disc_PI__c", isEditable="true", displayName="Discount PI", column="Disc_PI__c", isVisible="true", align="right", uiOrder="2")
+	decimal(4) discountPI = [0..5];
+	@(readProp="#productCode", displayName="Product Code", flex="1", source="ProductCode", isVisible="true", uiOrder="3")
+	string productCode = this.getProperty("#productCode");
+	@(technical="true")
+	decimal(4) revenue = [0..MAX_DECIMAL];
+	decimal(4) cost = [0..MAX_DECIMAL];
+	decimal(4) costDiscountRate = [0..10];
+	decimal(4) costDiscountPI = [0..10];
+	@(column="Min_Max_Validation_Required__c")
+	boolean minMaxValidationRequired;
+	@(column="Minimum_Discount_Rate__c")
+	decimal(4) minDiscountRate = [0..10];
+	@(column="Maximum_Discount_Rate__c")
+	decimal(4) maxDiscountRate = [0..10];
+	string parentBundleName = parent(bundleName);
+	boolean discountRateViolated = minMaxValidationRequired&&(minDiscountRate!=maxDiscountRate)&&(parentBundleName!="MPOS Bundle")&&(parentBundleName!="100% Card-Present Flat Rate")&&((discountRate<minDiscountRate)||(discountRate>maxDiscountRate));
+	boolean discountRateViolated1 = minMaxValidationRequired&&(minDiscountRate==maxDiscountRate)&&((discountRate<minDiscountRate)||(discountRate>maxDiscountRate));
+	@(column="Minimum_Disc_PI__c")
+	decimal(4) minDiscountPI = [0..5];
+	@(column="Maximum_Disc_PI__c")
+	decimal(4) maxDiscountPI = [0..5];
+	string discountPIMsg = "ERR#05;"+productDescription+" Discount PI must be between "+minDiscountPI+" and "+maxDiscountPI;
+
+	@(userKeys="productCode,CurrencyIsoCode,Owner_Geography__c")
+	preference(table(productCode,CurrencyIsoCode,Owner_Geography__c,costDiscountRate,costDiscountPI,SalesforceHashTable("Pricing_Cost_Assumption__c","ProductCode__c, CurrencyIsoCode, Region__c","Rate_Percent__c, Rate_Factor__c","ProductClass__c = 'AssessmentFee'")));
+
+	message(discountRateViolated==true,"ERR#04;Discount Rate (%) applied to Assessment Fee Products marked with [?] are outside of the defined thresholds. You may review the rates.");
+	message(discountRateViolated1==true,"ERR#04;Discount Rate (%) applied to Assessment Fee Products marked with [?] are outside of the defined thresholds. You may review the rates.");
+}
+
+type VisaAssessmentFee : AssessmentFee {
+	decimal(4) annualSales = parent(visaCardAnnualSales);
+}
+
+type tax_reimbursement_fee : AssessmentFee {}
+
+//start US391531
+type visa_non_emv_pos_usage_fee : AssessmentFee {
+	message((discountPI<minDiscountPI||discountPI>maxDiscountPI),discountPIMsg);
+}
+
+//end US391531
+type VisaAssessmentZeroFee : VisaAssessmentFee {
+	decimal(4) revenue = 0;
+	decimal(4) cost = 0;
+}
+
+type VS_SIF_C1D : VisaAssessmentZeroFee {}
+
+type VS_SIF_C1X : VisaAssessmentZeroFee {}
+
+type VSSIFC2C4D : VisaAssessmentZeroFee {}
+
+type VSSIFC2C4X : VisaAssessmentZeroFee {}
+
+type VS_SIF_C3D : VisaAssessmentZeroFee {}
+
+type VS_SIF_C3X : VisaAssessmentZeroFee {}
+
+type VS_DCF_DOM : VisaAssessmentZeroFee {}
+
+type VS_DCF_XB : VisaAssessmentZeroFee {}
+
+type VS_SIF_C1D_USD : VisaAssessmentZeroFee {}
+
+type VS_SIF_C1X_USD : VisaAssessmentZeroFee {}
+
+type VSSIFC2C4D_USD : VisaAssessmentZeroFee {}
+
+type VSSIFC2C4X_USD : VisaAssessmentZeroFee {}
+
+type VS_SIF_C3D_USD : VisaAssessmentZeroFee {}
+
+type VS_SIF_C3X_USD : VisaAssessmentZeroFee {}
+
+type VS_DCF_DOM_USD : VisaAssessmentZeroFee {}
+
+type VS_DCF_XB_USD : VisaAssessmentZeroFee {}
+
+type visa_assessment_can : VisaAssessmentFee {
+	decimal(4) revenue = annualSales*discountRate/100;
+	decimal(4) cost = annualSales*costDiscountRate/100;
+}
+
+type Visa_Infrastructure_Fee : VisaAssessmentZeroFee {}
+
+type MasterAssessmentFee : AssessmentFee {}
+
+type mastercard_assessment_can : MasterAssessmentFee {
+	decimal(4) annualSales = parent(masterCardAnnualSales);
+	decimal(4) revenue = annualSales*discountRate/100;
+	decimal(4) cost = annualSales*costDiscountRate/100;
+}
+
+type mastercard_data_usage_fee_can : MasterAssessmentFee {
+	int annualTransactions = parent(masterCardAnnualTransactions);
+	decimal(4) revenue = annualTransactions*discountPI;
+	decimal(4) cost = 0;
+}
+
+type MasterAssessmentZeroFee : MasterAssessmentFee {
+	decimal(4) revenue = 0;
+	decimal(4) cost = 0;
+}
+
+type MC_Procss_Integrity_can : MasterAssessmentZeroFee {}
+
+type MC_Procss_min_can : MasterAssessmentZeroFee {}
+
+type MC_preauth_PI_can : MasterAssessmentZeroFee {}
+
+type MC_PExcess_auth_can : MasterAssessmentZeroFee {}
+
+type MC_PNominal_amt_can : MasterAssessmentZeroFee {}
+
+type MC_Procss_min_can_usd : MasterAssessmentZeroFee {}
+
+type MC_preauth_PI_can_usd : MasterAssessmentZeroFee {}
+
+type MC_PExcess_auth_can_usd : MasterAssessmentZeroFee {}
+
+type MC_PNominal_amt_can_usd : MasterAssessmentZeroFee {}
+
+type DiscoverAssessmentFee : AssessmentFee {
+	decimal(4) annualSales = parent(discoveryCardAnnualSales);
+}
+
+type discover_assessment_can : DiscoverAssessmentFee {
+	decimal(4) revenue = annualSales*discountRate/100;
+	decimal(4) cost = annualSales*costDiscountRate/100;
+}
+
+type AmexAssessmentFee : AssessmentFee {
+	decimal(4) annualSales = parent(amexCardAnnualSales);
+}
+
+type amex_optblue_assessment_can : AmexAssessmentFee {
+	decimal(4) revenue = annualSales*discountRate/100;
+	decimal(4) cost = annualSales*costDiscountRate/100;
+}
+
+type amex_optblue_cnp_can : AmexAssessmentFee {
+	decimal(4) cnpAnnualSales = parent(amexCardCNPAnnualSales);
+	decimal(4) revenue = cnpAnnualSales*discountRate/100;
+	decimal(4) cost = cnpAnnualSales*costDiscountRate/100;
+}
+
+type JCBAssessmentFee : AssessmentFee {
+	decimal(4) annualSales = parent(jcbCardAnnualSales);
+}
+
+type JCB_optblue_cnp_can : JCBAssessmentFee {
+	decimal(4) cnpAnnualSales = parent(jcbCardCNPAnnualSales);
+	decimal(4) revenue = cnpAnnualSales*discountRate/100;
+	decimal(4) cost = cnpAnnualSales*costDiscountRate/100;
+}
+
+type JCB_optblue_network_can : JCBAssessmentFee {
+	decimal(4) revenue = annualSales*discountRate/100;
+	decimal(4) cost = annualSales*costDiscountRate/100;
+}
+
+type XBAssessmentFee : AssessmentFee {}
+
+type visa_xb_assessment_can : XBAssessmentFee {
+	decimal(4) annualXBSales = parent(visaCardAnnualXBSales);
+	decimal(4) revenue = (MOSS_Currency_Indicator__c=="CAD")?annualXBSales*discountRate/100:0;
+	decimal(4) cost = (MOSS_Currency_Indicator__c=="CAD")?annualXBSales*costDiscountRate/100:0;
+	string discMsgassessment = "E;discountRate;"+productDescription+" Discount Rate should be between 0.60% and 10%";
+
+	message(Owner_Geography__c=="Canada"&&parentBundleName=="100% Card-Present Flat Rate"&&(discountRate<0.60||discountRate>10),discMsgassessment);
+}
+
+type visa_xb_intl_can : XBAssessmentFee {
+	decimal(4) annualXBSales = parent(visaCardAnnualXBSales);
+	decimal(4) revenue = (MOSS_Currency_Indicator__c=="USD")?annualXBSales*discountRate/100:0;
+	decimal(4) cost = (MOSS_Currency_Indicator__c=="USD")?annualXBSales*costDiscountRate/100:0;
+	string discMsgassessmentintl = "E;discountRate;"+productDescription+" Discount Rate should be between 1% and 10%";
+
+	message(Owner_Geography__c=="Canada"&&parentBundleName=="100% Card-Present Flat Rate"&&(discountRate<1||discountRate>10),discMsgassessmentintl);
+}
+
+type mastercard_xb_intl_can : XBAssessmentFee {
+	decimal(4) annualXBSales = parent(masterCardAnnualXBSales);
+	decimal(4) revenue = (MOSS_Currency_Indicator__c=="CAD")?annualXBSales*discountRate/100:0;
+	decimal(4) cost = (MOSS_Currency_Indicator__c=="CAD")?annualXBSales*costDiscountRate/100:0;
+	string discMsgassessmentmc = "E;discountRate;"+productDescription+" Discount Rate should be between 1% and 10%";
+
+	message(Owner_Geography__c=="Canada"&&parentBundleName=="100% Card-Present Flat Rate"&&(discountRate<1||discountRate>10),discMsgassessmentmc);
+}
+
+type mastercard_xb_cdn_can : XBAssessmentFee {
+	decimal(4) annualXBSales = parent(masterCardAnnualXBSales);
+	decimal(4) revenue = (MOSS_Currency_Indicator__c=="USD")?annualXBSales*discountRate/100:0;
+	decimal(4) cost = (MOSS_Currency_Indicator__c=="USD")?annualXBSales*costDiscountRate/100:0;
+	string discMsgassessmentmc = "E;discountRate;"+productDescription+" Discount Rate should be between 0.60% and 10%";
+
+	message(Owner_Geography__c=="Canada"&&parentBundleName=="100% Card-Present Flat Rate"&&(discountRate<0.60||discountRate>10),discMsgassessmentmc);
+}
+
+type discover_xb_intl_can : XBAssessmentFee {
+	decimal(4) annualXBSales = parent(discoveryCardAnnualXBSales);
+	decimal(4) revenue = annualXBSales*discountRate/100;
+	decimal(4) cost = annualXBSales*costDiscountRate/100;
+}
+
+type amex_optblue_xb_assessments_can : XBAssessmentFee {
+	decimal(4) annualXBSales = parent(amexCardAnnualXBSales);
+	decimal(4) revenue = annualXBSales*discountRate/100;
+	decimal(4) cost = annualXBSales*costDiscountRate/100;
+}
+
+type IDPFee : AssessmentFee {
+	int annualTransactions = parent(interacCardAnnualTransactions);
+}
+
+type IDP_network_fee_can : IDPFee {
+	decimal(4) revenue = annualTransactions*discountPI;
+	decimal(4) cost = annualTransactions*costDiscountPI;
+}
+
+type PCI_fee_can : AssessmentFee {
+	decimal(4) totalSales = parent(totalCreditSales);
+	int totalAnnualTransactions = parent(totalCreditTransactions);
+	decimal(4) revenue = totalSales*discountRate/100+totalAnnualTransactions*discountPI;
+	decimal(4) cost = 0;
+}
+
+type MClicenseFee : AssessmentFee {
+	decimal(4) totalSales = parent(masterCardAnnualSales);
+	int totalAnnualTransactions = parent(masterCardAnnualTransactions);
+}
+
+type mastercard_license_fee_can : MClicenseFee {
+	decimal(4) totalSales = parent(masterCardAnnualSales);
+	int totalAnnualTransactions = parent(masterCardAnnualTransactions);
+	decimal(4) revenue = totalSales*discountRate/100+totalAnnualTransactions*discountPI;
+	decimal(4) cost = totalSales*costDiscountRate/100+totalAnnualTransactions*costDiscountPI;
+}
+
+@(split="true", quantityAttribute="quantity")
+type BaseFee {
+	string pricebookId = SBQQ__PricebookId__c;
+	@(readProp="#description", displayName="Product Description", flex="1", isVisible="true", uiOrder="0")
+	string productDescription = this.getProperty("#description");
+	@(isEditable="true", mapToField="SBQQ__Quantity__c", displayName="Quantity", width="100", defaultvalue="1", isVisible="true", align="right", uiOrder="1")
+	int quantity = [0..MAX_INT];
+	@(mapToField="Cycle__c", displayName="Cycle", column="Cycle__c", width="140", defaultvalue="", isVisible="true", uiOrder="2")
+	string cycle = ["","ANNUAL","MONTHLY","QUARTERLY","ONE TIME","PER OCCURRENCE","PER ITEM"];
+	@(isEditable="true", mapToField="SBQQ__ListPrice__c", defaultValueLoader="defaultValueHashTableLoader", userKeys="pricebookId, productCode", displayName="List Price", column="UnitPrice", width="100", source="DEFAULT_UNIT_PRICE", isVisible="true", align="right", uiOrder="3")
+	decimal(4) unitPrice = [0..MAX_DECIMAL];
+	@(mapToField="SBQQ__ComponentCost__c")
+	decimal(4) SBQQ__ComponentCost__c = 0;
+	@(mapToField="SBQQ__ComponentListTotal__c")
+	decimal(4) SBQQ__ComponentListTotal__c = 0;
+	@(mapToField="SBQQ__ComponentTotal__c")
+	decimal(4) SBQQ__ComponentTotal__c = 0;
+	@(mapToField="SBQQ__CustomerPrice__c")
+	decimal(4) SBQQ__CustomerPrice__c = 0;
+	@(mapToField="SBQQ__NetPrice__c")
+	decimal(4) SBQQ__NetPrice__c = 0;
+	@(mapToField="SBQQ__PartnerPrice__c")
+	decimal(4) SBQQ__PartnerPrice__c = 0;
+	@(mapToField="SBQQ__ProrateMultiplier__c")
+	decimal(4) SBQQ__ProrateMultiplier__c = 1;
+	@(mapToField="SBQQ__ProratedListPrice__c")
+	decimal(4) SBQQ__ProratedListPrice__c = 0;
+	@(mapToField="SBQQ__ProratedPrice__c")
+	decimal(4) SBQQ__ProratedPrice__c = 0;
+	@(mapToField="SBQQ__RegularPrice__c")
+	decimal(4) SBQQ__RegularPrice__c = 0;
+	@(mapToField="SBQQ__SpecialPrice__c")
+	decimal(4) SBQQ__SpecialPrice__c = 0;
+	@(mapToField="SBQQ__UpliftAmount__c")
+	decimal(4) SBQQ__UpliftAmount__c = 0;
+	//Start: US314062
+	@(column="Billing_Currency__c")
+	string BillingCurrencyFee = ["","USD","CAD","N/A"];
+	string usdErrorMsg = "E;"+productDescription+" can only be ordered for CAD currency application.";
+	string cadErrorMsg = "E;"+productDescription+" can only be ordered for USD currency application.";
+	//End: US314062
+	@(readProp="#productCode", displayName="Product Code", flex="1", source="ProductCode", isVisible="true", uiOrder="4")
+	string productCode = this.getProperty("#productCode");
+	decimal(4) revenue = [0..MAX_DECIMAL];
+	decimal(4) annualFee = [0..MAX_DECIMAL];
+	decimal(4) monthlyFee = [0..MAX_DECIMAL];
+	decimal(4) quarterlyFee = [0..MAX_DECIMAL];
+	decimal(4) onetimeFee = [0..MAX_DECIMAL];
+	decimal(4) occurrenceFee = [0..MAX_DECIMAL];
+	decimal(4) itemFee = [0..MAX_DECIMAL];
+
+	message(Owner_Geography__c=="Canada"&&MOSS_Currency_Indicator__c=="CAD"&&BillingCurrencyFee=="USD",cadErrorMsg);
+	message(Owner_Geography__c=="Canada"&&MOSS_Currency_Indicator__c=="USD"&&BillingCurrencyFee=="CAD",usdErrorMsg);
+}
+
+type Fee : BaseFee {
+	@(column="Minimum_Amount__c")
+	decimal(4) minUnitPrice = [0..MAX_DECIMAL];
+	@(column="Maximum_Amount__c")
+	decimal(4) maxUnitPrice = [0..MAX_DECIMAL];
+	string unitPriceMsg = "W;unitPrice;"+productDescription+" unit price must be between "+minUnitPrice+" and "+maxUnitPrice;
+	string unitPriceMsg1 = "E;unitPrice;"+productDescription+" unit price must be "+maxUnitPrice;
+	decimal(4) annualFee = (cycle=="ANNUAL")?revenue:0;
+	decimal(4) monthlyFee = (cycle=="MONTHLY")?revenue:0;
+	decimal(4) quarterlyFee = (cycle=="QUARTERLY")?revenue:0;
+	decimal(4) onetimeFee = (cycle=="ONE TIME")?revenue:0;
+	decimal(4) occurrenceFee = (cycle=="PER OCCURRENCE")?revenue:0;
+	decimal(4) itemFee = (cycle=="PER ITEM")?revenue:0;
+
+	message((minUnitPrice!=maxUnitPrice)&&((unitPrice<minUnitPrice)||(unitPrice>maxUnitPrice)),unitPriceMsg);
+}
+
+type LocationBasedFee : Fee {
+	decimal(4) revenue = (cycle=="QUARTERLY")?(unitPrice*Locations__c*4*quantity):((cycle=="MONTHLY")?(unitPrice*Locations__c*12*quantity):(unitPrice*Locations__c*quantity));
+}
+
+type LocationBaseZeroFee : Fee {
+	decimal(4) revenue = 0;
+}
+
+type TransactionBasedFee : Fee {}
+
+type CreditTransactionBasedFee : Fee {}
+
+type CA_CATL00068_ORDI00530_RATT00139 : CreditTransactionBasedFee {
+	decimal(4) DialUpPercentage = parent(DialUpPercentage);
+	int totalTransactions = parent(totalAnnualTransactions);
+	decimal(4) revenue = totalTransactions*DialUpPercentage*unitPrice/100;
+}
+
+type DebitTransactionBasedFee : Fee {}
+
+type CreditVolumeBasedFee : Fee {}
+
+type VolumeBasedFee : Fee {}
+
+type BatchSettlementBaseFee : Fee {
+	int batch = [0..MAX_INT];
+	decimal(4) revenue = unitPrice*quantity*batch;
+}
+
+type OneTimeRelationshipFee : Fee {}
+
+type CA_CATL00078_ORDI01672_RATT00373 : OneTimeRelationshipFee {}
+
+type CA_CATL00068_ORDI00477_RATT00133 : LocationBasedFee {}
+
+type CA_CATL00068_ORDI00358_RATT00015 : LocationBasedFee {}
+
+type CA_CATL00086_ORDI00591_RATT00168 : LocationBasedFee {}
+
+type CA_CATL00068_ORDI01673_RATT00370 : LocationBasedFee {}
+
+type CA_CATL00086_ORDI01020 : LocationBasedFee {}
+
+//Added as part of US327105
+//Start US351861,US351862
+//Start DE111495
+type CA_CATL00068_ORDI04063_RATT01171 : LocationBasedFee {
+	message((minUnitPrice!=maxUnitPrice)&&((unitPrice<minUnitPrice)||(unitPrice>maxUnitPrice)),unitPriceMsg);
+	message((minUnitPrice==maxUnitPrice)&&((unitPrice!=minUnitPrice)||(unitPrice!=maxUnitPrice)),unitPriceMsg1);
+}
+
+type CA_CATL00068_ORDI04099_RATT01171 : LocationBasedFee {
+	message((minUnitPrice!=maxUnitPrice)&&((unitPrice<minUnitPrice)||(unitPrice>maxUnitPrice)),unitPriceMsg);
+	message((minUnitPrice==maxUnitPrice)&&((unitPrice!=minUnitPrice)||(unitPrice!=maxUnitPrice)),unitPriceMsg1);
+}
+
+type CA_CATL00068_ORDI04062_RATT01170 : LocationBasedFee {
+	message((minUnitPrice!=maxUnitPrice)&&((unitPrice<minUnitPrice)||(unitPrice>maxUnitPrice)),unitPriceMsg);
+	message((minUnitPrice==maxUnitPrice)&&((unitPrice!=minUnitPrice)||(unitPrice!=maxUnitPrice)),unitPriceMsg1);
+}
+
+type CA_CATL00068_ORDI04100_RATT01170 : LocationBasedFee {
+	message((minUnitPrice!=maxUnitPrice)&&((unitPrice<minUnitPrice)||(unitPrice>maxUnitPrice)),unitPriceMsg);
+	message((minUnitPrice==maxUnitPrice)&&((unitPrice!=minUnitPrice)||(unitPrice!=maxUnitPrice)),unitPriceMsg1);
+}
+
+//End DE111495
+//End US351861,US351862
+type CA_CATL00068_ORDI00369_RATT00039 : LocationBaseZeroFee {}
+
+type CA_CATL00068_ORDI00370_RATT00040 : LocationBaseZeroFee {}
+
+type CA_CATL00068_ORDI00368_RATT00038 : LocationBaseZeroFee {}
+
+type CA_CATL00068_ORDI00355_RATT00125 : LocationBaseZeroFee {}
+
+type CA_CATL00068_ORDI00356_RATT00134 : LocationBaseZeroFee {}
+
+type CA_CATL00068_ORDI00366_RATT00036 : LocationBasedFee {}
+
+type CA_CATL00068_ORDI00359_RATT00016 : LocationBasedFee {}
+
+type CA_CATL00068_ORDI00377_RATT00047 : LocationBasedFee {}
+
+type CA_CATL00068_ORDI00371_RATT00041 : BatchSettlementBaseFee {}
+
+type CA_CATL00068_ORDI00849_RATT00232 : TransactionBasedFee {
+	decimal(4) IPPercentage = parent(IPPercentage);
+	int totalTransactions = parent(totalAnnualTransactions);
+	decimal(4) revenue = totalTransactions*IPPercentage*unitPrice;
+}
+
+type CA_CATL00068_ORDI01672_RATT00369 : TransactionBasedFee {}
+
+@(split="true", quantityAttribute="quantity")
+type FeePlan {
+	string pricebookId = SBQQ__PricebookId__c;
+	@(readProp="#description", displayName="Product Description", isVisible="true", uiOrder="0")
+	string productDescription = this.getProperty("#description");
+	@(mapToField="SBQQ__Quantity__c", displayName="Quantity", defaultvalue="1")
+	int quantity = [1..MAX_INT];
+	@(mapToField="Cycle__c", displayName="Cycle", column="Cycle__c", width="140", defaultvalue="", isVisible="true", uiOrder="1")
+	string cycle = ["","ANNUAL","MONTHLY","QUARTERLY","ONE TIME","PER OCCURRENCE","N/A","PER ITEM"];
+	@(isEditable="true", mapToField="SBQQ__ListPrice__c", displayName="List Price", defaultValueLoader="defaultValueHashTableLoader", userKeys="pricebookId, productCode", column="UnitPrice", width="100", isVisible="true", source="DEFAULT_UNIT_PRICE", align="right")
+	decimal(4) unitPrice = [0..MAX_DECIMAL];
+	@(mapToField="SBQQ__ComponentCost__c")
+	decimal(4) SBQQ__ComponentCost__c = 0;
+	@(mapToField="SBQQ__ComponentListTotal__c")
+	decimal(4) SBQQ__ComponentListTotal__c = 0;
+	@(mapToField="SBQQ__ComponentTotal__c")
+	decimal(4) SBQQ__ComponentTotal__c = 0;
+	@(mapToField="SBQQ__CustomerPrice__c")
+	decimal(4) SBQQ__CustomerPrice__c = 0;
+	@(mapToField="SBQQ__NetPrice__c")
+	decimal(4) SBQQ__NetPrice__c = 0;
+	@(mapToField="SBQQ__PartnerPrice__c")
+	decimal(4) SBQQ__PartnerPrice__c = 0;
+	@(mapToField="SBQQ__ProrateMultiplier__c")
+	decimal(4) SBQQ__ProrateMultiplier__c = 1;
+	@(mapToField="SBQQ__ProratedListPrice__c")
+	decimal(4) SBQQ__ProratedListPrice__c = 0;
+	@(mapToField="SBQQ__ProratedPrice__c")
+	decimal(4) SBQQ__ProratedPrice__c = 0;
+	@(mapToField="SBQQ__RegularPrice__c")
+	decimal(4) SBQQ__RegularPrice__c = 0;
+	@(mapToField="SBQQ__SpecialPrice__c")
+	decimal(4) SBQQ__SpecialPrice__c = 0;
+	@(mapToField="SBQQ__UpliftAmount__c")
+	decimal(4) SBQQ__UpliftAmount__c = 0;
+	@(readProp="#productCode", displayName="Product Code", isVisible="true", uiOrder="3")
+	string productCode = this.getProperty("#productCode");
+	@(column="Minimum_Amount__c")
+	decimal(4) minUnitPrice = [0..MAX_DECIMAL];
+	@(column="Maximum_Amount__c")
+	decimal(4) maxUnitPrice = [0..MAX_DECIMAL];
+	string unitPriceMsg = "W;unitPrice;"+productDescription+" unit price must be between "+minUnitPrice+" and "+maxUnitPrice;
+	decimal(4) revenue = [0..MAX_DECIMAL];
+	decimal(4) annualFee = (cycle=="ANNUAL")?revenue:0;
+	decimal(4) monthlyFee = (cycle=="MONTHLY")?revenue:0;
+	decimal(4) quarterlyFee = (cycle=="QUARTERLY")?revenue:0;
+	decimal(4) onetimeFee = (cycle=="ONE TIME")?revenue:0;
+	decimal(4) occurrenceFee = (cycle=="PER OCCURRENCE")?revenue:0;
+	decimal(4) itemFee = (cycle=="PER Item")?revenue:0;
+
+	message((minUnitPrice!=maxUnitPrice)&&((unitPrice<minUnitPrice)||(unitPrice>maxUnitPrice)),unitPriceMsg);
+}
+
+type GenericFeePlan : FeePlan {
+	decimal(4) revenue = (cycle=="ANNUAL")?(unitPrice*Contract_Term__c*quantity):((cycle=="QUARTERLY")?(unitPrice*Contract_Term__c*4*quantity):((cycle=="MONTHLY")?(unitPrice*Contract_Term__c*12*quantity):(unitPrice*quantity)));
+}
+
+type LocationBasedFeePlan : FeePlan {
+	decimal(4) revenue = (cycle=="QUARTERLY")?(unitPrice*Locations__c*4*quantity):((cycle=="MONTHLY")?(unitPrice*Locations__c*12*quantity):(unitPrice*Locations__c*quantity));
+}
+
+type CA_CATL00068_ORDI01257_RATT00340 : LocationBasedFeePlan {}
+
+type LocationBaseZeroFeePlan : FeePlan {
+	decimal(4) revenue = 0;
+}
+
+type CA_CATL00086_ORDI02513_RATT00513 : LocationBasedFeePlan {}
+
+type CA_CATL00086_ORDI02513_RATT00514 : LocationBasedFeePlan {}
+
+type CA_CATL00086_ORDI02345_RATT00017 : LocationBasedFeePlan {}
+
+type CA_CATL00086_ORDI02344_RATT00017 : LocationBasedFeePlan {}
+
+type CA_CATL00068_ORDI00850_RATT00549 : LocationBasedFeePlan {}
+
+type CA_CATL00068_ORDI00850_RATT00279 : LocationBasedFeePlan {}
+
+type CA_CATL00068_ORDI00850_RATT00548 : LocationBasedFeePlan {}
+
+type CA_CATL00068_ORDI00850_RATT00547 : LocationBasedFeePlan {
+	@(mapToField="Discount_Rate__c")
+	decimal(4) discountRate = unitPrice;
+}
+
+type CA_CATL00068_ORDI00850_RATT00425 : LocationBasedFeePlan {}
+
+type CA_CATL00068_ORDI01523_RATT00436 : LocationBasedFeePlan {}
+
+type CA_CATL00086_ORDI00580_RATT00051 : LocationBaseZeroFeePlan {}
+
+//type CA_CATL00086_ORDI01020_RATT00288 : LocationBasedFeePlan {} //commented as aprt of US327105
+//type CA_CATL00086_ORDI01020_RATT00290 : LocationBasedFeePlan {} //commented as aprt of US327105
+type CA_CATL00086_ORDI02138_RATT00429 : LocationBasedFeePlan {}
+
+type CA_CATL00086_ORDI02138_RATT00430 : LocationBasedFeePlan {}
+
+type CA_CATL00086_ORDI02199_RATT00453 : LocationBasedFeePlan {}
+
+type CA_CATL00086_ORDI02199_RATT00455 : LocationBasedFeePlan {}
+
+type CA_CATL00086_ORDI02200_RATT00454 : LocationBasedFeePlan {}
+
+type CA_CATL00086_ORDI02200_RATT00455 : LocationBasedFeePlan {}
+
+type CA_CATL00086_ORDI02495_RATT00288 : LocationBasedFeePlan {}
+
+type CA_CATL00086_ORDI02495_RATT00290 : LocationBasedFeePlan {}
+
+type CA_CATL00086_ORDI02517_RATT00288 : LocationBasedFeePlan {}
+
+type CA_CATL00086_ORDI02517_RATT00290 : LocationBasedFeePlan {}
+
+type CA_CATL00086_ORDI02518_RATT00288 : LocationBasedFeePlan {}
+
+type CA_CATL00086_ORDI02518_RATT00290 : LocationBasedFeePlan {}
+
+type CA_CATL00068_ORDI01710 : FeeWithPlan {}
+
+type CA_CATL00068_ORDI01710_RATT00520 : LocationBasedFeePlan {}
+
+type CA_CATL00068_ORDI01710_RATT00375 : LocationBasedFeePlan {}
+
+type CA_CATL00062_ORDI02557 : FeeWithPlan {}
+
+type CA_CATL00062_ORDI02557_RATT00544 : LocationBasedFeePlan {}
+
+type CA_CATL00062_ORDI02557_RATT00545 : LocationBasedFeePlan {}
+
+type CA_CATL00062_ORDI02557_RATT00412 : LocationBasedFeePlan {}
+
+type CA_CATL00062_ORDI02556 : FeeWithPlan {}
+
+type CA_CATL00062_ORDI02556_RATT00412 : LocationBasedFeePlan {}
+
+type CA_CATL00062_ORDI02556_RATT00544 : LocationBasedFeePlan {}
+
+type CA_CATL00062_ORDI02556_RATT00545 : LocationBasedFeePlan {}
+
+type CA_CATL00068_ORDI01258 : FeeWithPlan {}
+
+type CA_CATL00068_ORDI01258_RATT00343 : LocationBasedFeePlan {}
+
+type CA_CATL00068_ORDI01258_RATT00519 : LocationBasedFeePlan {}
+
+type CA_CATL00086_ORDI03333 : FeeWithPlan {}
+
+// US314574
+type CreditTransactionBasedFeePlan : FeePlan {}
+
+type TransactionBasedFeePlan : FeePlan {}
+
+type CA_CATL00068_ORDI02360_RATT00492 : TransactionBasedFeePlan {
+	int interacCardAnnualTransactions = parent(interacCardAnnualTransactions);
+	decimal(4) revenue = interacCardAnnualTransactions*unitPrice;
+}
+
+type CA_CATL00068_ORDI02292_RATT00460 : TransactionBasedFeePlan {
+	int masterCardAnnualTransactions = parent(masterCardAnnualTransactions);
+	decimal(4) revenue = masterCardAnnualTransactions*unitPrice;
+}
+
+type CA_CATL00068_ORDI01710_RATT00377 : TransactionBasedFeePlan {
+	int totalTransactions = parent(totalAnnualTransactions);
+	decimal(4) revenue = totalTransactions*unitPrice;
+}
+
+type CA_CATL00068_ORDI02169_RATT00443 : TransactionBasedFeePlan {
+	int totalTransactions = parent(totalAnnualTransactions);
+	decimal(4) revenue = totalTransactions*unitPrice;
+}
+
+//start US345270
+type CA_CATL00068_ORDI02169_RATT00440 : TransactionBasedFeePlan {
+	int totalTransactions = parent(totalAnnualTransactions);
+	decimal(4) revenue = totalTransactions*unitPrice;
+}
+
+type CA_CATL00068_ORDI02521_RATT00516 : LocationBasedFeePlan {}
+
+type CA_CATL00062_ORDI02913_RATT00747 : TransactionBasedFeePlan {
+	int totalTransactions = parent(totalAnnualTransactions);
+	decimal(4) revenue = totalTransactions*unitPrice;
+}
+
+//end US345270
+type CA_CATL00068_ORDI01258_RATT00345 : TransactionBasedFeePlan {
+	int totalTransactions = parent(totalAnnualTransactions);
+	decimal(4) revenue = totalTransactions*unitPrice;
+}
+
+type CA_CATL00068_ORDI01257_RATT00342 : TransactionBasedFeePlan {
+	int totalTransactions = parent(totalAnnualTransactions);
+	decimal(4) revenue = totalTransactions*unitPrice;
+}
+
+type CA_CATL00068_ORDI01254_RATT00323 : TransactionBasedFeePlan {
+	int totalTransactions = parent(totalAnnualTransactions);
+	decimal(4) revenue = totalTransactions*unitPrice;
+}
+
+type CA_CATL00068_ORDI02521_RATT00518 : TransactionBasedFeePlan {
+	int totalTransactions = parent(totalAnnualTransactions);
+	decimal(4) revenue = totalTransactions*unitPrice;
+}
+
+type CA_CATL00068_ORDI00851_RATT00281 : TransactionBasedFeePlan {
+	int totalTransactions = parent(totalAnnualTransactions);
+	decimal(4) revenue = totalTransactions*unitPrice;
+}
+
+type CA_CATL00068_ORDI01523_RATT00399 : TransactionBasedFeePlan {
+	int totalTransactions = parent(totalAnnualTransactions);
+	decimal(4) revenue = totalTransactions*unitPrice;
+}
+
+type CreditVolumeBasedFeePlan : FeePlan {}
+
+type CA_CATL00086_ORDI03333_RATT00872 : CreditVolumeBasedFeePlan {
+	@(useDomainValue="true")
+	string cycle;
+	decimal(4) totalCreditSales = parent(totalCreditSales);
+	//decimal(4) revenue = totalCreditSales*unitPrice/100; //Commented as part of US334897
+	@(mapToField="Discount_Rate__c")
+	decimal(4) discountRate = unitPrice;
+}
+
+type CA_CATL00086_ORDI03333_RATT00873 : CreditVolumeBasedFeePlan {
+	@(useDomainValue="true")
+	string cycle;
+	decimal(4) totalCreditSales = parent(totalCreditSales);
+	//decimal(4) revenue = totalCreditSales*unitPrice/100; //Commented as part of US334897
+	@(mapToField="Discount_Rate__c")
+	decimal(4) discountRate = unitPrice;
+}
+
+type CA_CATL00086_ORDI03333_RATT00874 : CreditVolumeBasedFeePlan {
+	@(useDomainValue="true")
+	string cycle;
+	decimal(4) totalCreditSales = parent(totalCreditSales);
+	//decimal(4) revenue = totalCreditSales*unitPrice/100; //Commented as part of US334897
+	@(mapToField="Discount_Rate__c")
+	decimal(4) discountRate = unitPrice;
+}
+
+type CA_CATL00086_ORDI03333_RATT00875 : CreditVolumeBasedFeePlan {
+	@(useDomainValue="true")
+	string cycle;
+	decimal(4) totalCreditSales = parent(totalCreditSales);
+	//decimal(4) revenue = totalCreditSales*unitPrice/100; //Commented as part of US334897
+	@(mapToField="Discount_Rate__c")
+	decimal(4) discountRate = unitPrice;
+}
+
+type CA_CATL00086_ORDI03333_RATT00876 : CreditVolumeBasedFeePlan {
+	@(useDomainValue="true")
+	string cycle;
+	decimal(4) totalCreditSales = parent(totalCreditSales);
+	//decimal(4) revenue = totalCreditSales*unitPrice/100; //Commented as part of US334897
+	@(mapToField="Discount_Rate__c")
+	decimal(4) discountRate = unitPrice;
+}
+
+type CA_CATL00086_ORDI03333_RATT00877 : CreditVolumeBasedFeePlan {
+	@(useDomainValue="true")
+	string cycle;
+	decimal(4) totalCreditSales = parent(totalCreditSales);
+	//decimal(4) revenue = totalCreditSales*unitPrice/100; //Commented as part of US334897
+	@(mapToField="Discount_Rate__c")
+	decimal(4) discountRate = unitPrice;
+}
+
+type CA_CATL00086_ORDI03333_RATT00878 : CreditVolumeBasedFeePlan {
+	@(useDomainValue="true")
+	string cycle;
+	decimal(4) totalCreditSales = parent(totalCreditSales);
+	//decimal(4) revenue = totalCreditSales*unitPrice/100; //Commented as part of US334897
+	@(mapToField="Discount_Rate__c")
+	decimal(4) discountRate = unitPrice;
+}
+
+type CA_CATL00086_ORDI03333_RATT00879 : CreditVolumeBasedFeePlan {
+	@(useDomainValue="true")
+	string cycle;
+	decimal(4) totalCreditSales = parent(totalCreditSales);
+	//decimal(4) revenue = totalCreditSales*unitPrice/100; //Commented as part of US334897
+	@(mapToField="Discount_Rate__c")
+	decimal(4) discountRate = unitPrice;
+}
+
+type CA_CATL00068_ORDI02292_RATT00459 : CreditVolumeBasedFeePlan {
+	@(useDomainValue="true")
+	string cycle;
+	decimal(4) masterCardAnnualSales = parent(masterCardAnnualSales);
+	decimal(4) revenue = masterCardAnnualSales*unitPrice/100;
+	@(mapToField="Discount_Rate__c")
+	decimal(4) discountRate = unitPrice;
+}
+
+type CA_CATL00068_ORDI01710_RATT00376 : CreditVolumeBasedFeePlan {
+	@(useDomainValue="true")
+	string cycle;
+	decimal(4) totalCreditSales = parent(totalCreditSales);
+	decimal(4) revenue = totalCreditSales*unitPrice/100;
+	@(mapToField="Discount_Rate__c")
+	decimal(4) discountRate = unitPrice;
+}
+
+type CA_CATL00068_ORDI02169_RATT00441 : CreditVolumeBasedFeePlan {
+	@(useDomainValue="true")
+	string cycle;
+	decimal(4) totalCreditSales = parent(totalCreditSales);
+	decimal(4) revenue = totalCreditSales*unitPrice/100;
+	@(mapToField="Discount_Rate__c")
+	decimal(4) discountRate = unitPrice;
+}
+
+type CA_CATL00068_ORDI01258_RATT00344 : CreditVolumeBasedFeePlan {
+	@(useDomainValue="true")
+	string cycle;
+	decimal(4) totalCreditSales = parent(totalCreditSales);
+	decimal(4) revenue = totalCreditSales*unitPrice/100;
+	@(mapToField="Discount_Rate__c")
+	decimal(4) discountRate = unitPrice;
+}
+
+type CA_CATL00068_ORDI01257_RATT00341 : CreditVolumeBasedFeePlan {
+	@(useDomainValue="true")
+	string cycle;
+	decimal(4) totalCreditSales = parent(totalCreditSales);
+	decimal(4) revenue = totalCreditSales*unitPrice/100;
+	@(mapToField="Discount_Rate__c")
+	decimal(4) discountRate = unitPrice;
+}
+
+type CA_CATL00068_ORDI01254_RATT00322 : CreditVolumeBasedFeePlan {
+	@(useDomainValue="true")
+	string cycle;
+	decimal(4) totalCreditSales = parent(totalCreditSales);
+	decimal(4) revenue = totalCreditSales*unitPrice/100;
+	@(mapToField="Discount_Rate__c")
+	decimal(4) discountRate = unitPrice;
+}
+
+type VolumeBasedFeePlan : FeePlan {}
+
+type CA_CATL00068_ORDI02360_RATT00491 : VolumeBasedFeePlan {
+	decimal(4) interacCardAnnualSales = parent(interacCardAnnualSales);
+	decimal(4) revenue = interacCardAnnualSales*unitPrice/100;
+	@(mapToField="Discount_Rate__c")
+	decimal(4) discountRate = unitPrice;
+}
+
+type CA_CATL00068_ORDI02521_RATT00517 : VolumeBasedFeePlan {
+	decimal(4) totalSales = parent(totalSales);
+	decimal(4) revenue = totalSales*unitPrice/100;
+	@(mapToField="Discount_Rate__c")
+	decimal(4) discountRate = unitPrice;
+}
+
+type CA_CATL00068_ORDI01523_RATT00398 : VolumeBasedFeePlan {
+	decimal(4) totalSales = parent(totalSales);
+	decimal(4) revenue = totalSales*unitPrice/100;
+	@(mapToField="Discount_Rate__c")
+	decimal(4) discountRate = unitPrice;
+}
+
+type BatchSettlementBaseFeePlan : FeePlan {
+	int batch = [0..MAX_INT];
+	decimal(4) revenue = unitPrice*quantity*batch;
+}
+
+type CA_CATL00068_ORDI00851_RATT00330 : BatchSettlementBaseFeePlan {}
+
+type DebitTransactionBasedFeePlan : FeePlan {}
+
+type CA_CATL00086_ORDI00580_RATT00052 : DebitTransactionBasedFeePlan {
+	int interacCardAnnualTransactions = parent(interacCardAnnualTransactions);
+	decimal(4) revenue = interacCardAnnualTransactions*unitPrice/100;
+}
+
+type CA_CATL00068_ORDI01523_RATT00397 : LocationBasedFeePlan {}
+
+type CA_CATL00068_ORDI01254_RATT00321 : LocationBasedFeePlan {}
+
+@(defaultComponentLoader="defaultProductLoader", source="DEFAULT_DISCOUNT")
+type FeeWithPlan : BaseFee {
+	decimal(4) revenue = FeePlans.totalPlanRevenue;
+	boolean interacselected = parent(interacselected);
+	decimal(4) annualFee = FeePlans.totalAnnualFee;
+	decimal(4) monthlyFee = FeePlans.totalMonthlyFee;
+	decimal(4) quarterlyFee = FeePlans.totalQuarterlyFee;
+	decimal(4) onetimeFee = FeePlans.totalOnetimeFee;
+	decimal(4) occurrenceFee = FeePlans.totalOccurrenceFee;
+	decimal(4) itemFee = FeePlans.totalItemFee;
+
+	@(controlOrder="010", hasSubLevel="true", groupOrder="010", groupId="Banana CDI/DVI", controlLabel="Banana CDI/DVI", priceOptions="true", PropagateUp="true", disableCardinalityConstraint="true")
+	port FeePlans : FeePlan [0..99] {
+		totalPlanRevenue = sum(revenue);
+		totalAnnualFee = sum(annualFee);
+		totalMonthlyFee = sum(monthlyFee);
+		totalQuarterlyFee = sum(quarterlyFee);
+		totalOnetimeFee = sum(onetimeFee);
+		totalOccurrenceFee = sum(occurrenceFee);
+		totalItemFee = sum(itemFee);
+	}
+
+}
+
+type CA_CATL00086_ORDI02513 : FeeWithPlan {}
+
+type CA_CATL00086_ORDI02345 : FeeWithPlan {}
+
+type CA_CATL00086_ORDI02344 : FeeWithPlan {}
+
+type CA_CATL00068_ORDI00850 : FeeWithPlan {}
+
+type CA_CATL00068_ORDI02292 : FeeWithPlan {
+	@(defaultvalue="")
+	string cycle;
+}
+
+type CA_CATL00068_ORDI01523 : FeeWithPlan {}
+
+type CA_CATL00086_ORDI00580 : FeeWithPlan {}
+
+/*type CA_CATL00086_ORDI01020 : FeeWithPlan {
+	constraint(Owner_Geography__c=="Canada"&&MOSS_Currency_Indicator__c=="USD"->FeePlans[CA_CATL00086_ORDI01020_RATT00290]==0, "USD only merchants cannot be setup with Home Currency Pay");
+}*/
+//Commented as part of US327105
+type CA_CATL00086_ORDI02138 : FeeWithPlan {}
+
+type CA_CATL00086_ORDI02199 : FeeWithPlan {}
+
+type CA_CATL00086_ORDI02200 : FeeWithPlan {}
+
+type CA_CATL00086_ORDI02495 : FeeWithPlan {}
+
+type CA_CATL00086_ORDI02517 : FeeWithPlan {
+	constraint(Owner_Geography__c=="Canada"&&MOSS_Currency_Indicator__c=="USD"->FeePlans[CA_CATL00086_ORDI02517_RATT00290]==0,"USD only merchants cannot be setup with Home Currency Pay");
+}
+
+type CA_CATL00086_ORDI02518 : FeeWithPlan {}
+
+type CA_CATL00068_ORDI02360 : FeeWithPlan {}
+
+type CA_CATL00068_ORDI02521 : FeeWithPlan {}
+
+type CA_CATL00068_ORDI00851 : FeeWithPlan {}
+
+type CA_CATL00068_ORDI02169 : FeeWithPlan {}
+
+type CA_CATL00068_ORDI01257 : FeeWithPlan {}
+
+type CA_CATL00068_ORDI01254 : FeeWithPlan {}
+
+@(split="true", quantityAttribute="quantity")
+type Equipment {
+	string pricebookId = SBQQ__PricebookId__c;
+	@(readProp="#description", displayName="Product Description", flex="1", isVisible="true", uiOrder="0")
+	string productDescription = this.getProperty("#description");
+	@(displayName="Cycle", column="Cycle__c", width="140", defaultvalue="", isVisible="true", uiOrder="1")
+	string cycle = ["","ANNUAL","MONTHLY","QUARTERLY","ONE TIME","PER OCCURRENCE","PER ITEM"];
+	@(isEditable="true", mapToField="SBQQ__Quantity__c", displayName="Quantity", width="100", defaultvalue="1", isVisible="true", align="right", configurable="true", uiOrder="2")
+	int quantity = [0..MAX_INT];
+	@(displayName="Ownership", column="Ownership__c", defaultvalue="")
+	string ownership = ["","Rent","Purchase"];
+	@(isOtherReadonly="true", isEditable="true", mapToField="SBQQ__ListPrice__c", defaultValueLoader="defaultValueHashTableLoader", userKeys="pricebookId, productCode", displayName="List Price", column="UnitPrice", width="100", source="DEFAULT_UNIT_PRICE", isVisible="true", align="right", uiOrder="3")
+	decimal(4) unitPrice = [0..MAX_DECIMAL];
+	@(column="Front_End_Vendor__c")
+	string FrontEndVendorEquip = ["","GNAP","GSAP"];
+	//US302801
+	@(column="Billing_Currency__c")
+	string BillingCurrencyEqPlan = ["","USD","CAD","N/A"];
+	//US302804 & US302927
+	@(column="Home_Currency_Pay__c")
+	boolean HomeCurrencyProduct;
+	//US303279
+	@(column="Visa_Installment__c")
+	boolean VisaInstallmentProduct;
+	//US314574
+	@(mapToField="SBQQ__ComponentCost__c")
+	decimal(4) SBQQ__ComponentCost__c = 0;
+	@(mapToField="SBQQ__ComponentListTotal__c")
+	decimal(4) SBQQ__ComponentListTotal__c = 0;
+	@(mapToField="SBQQ__ComponentTotal__c")
+	decimal(4) SBQQ__ComponentTotal__c = 0;
+	@(mapToField="SBQQ__CustomerPrice__c")
+	decimal(4) SBQQ__CustomerPrice__c = 0;
+	@(mapToField="SBQQ__NetPrice__c")
+	decimal(4) SBQQ__NetPrice__c = 0;
+	@(mapToField="SBQQ__PartnerPrice__c")
+	decimal(4) SBQQ__PartnerPrice__c = 0;
+	@(mapToField="SBQQ__ProrateMultiplier__c")
+	decimal(4) SBQQ__ProrateMultiplier__c = 1;
+	@(mapToField="SBQQ__ProratedListPrice__c")
+	decimal(4) SBQQ__ProratedListPrice__c = 0;
+	@(mapToField="SBQQ__ProratedPrice__c")
+	decimal(4) SBQQ__ProratedPrice__c = 0;
+	@(mapToField="SBQQ__RegularPrice__c")
+	decimal(4) SBQQ__RegularPrice__c = 0;
+	@(mapToField="SBQQ__SpecialPrice__c")
+	decimal(4) SBQQ__SpecialPrice__c = 0;
+	@(mapToField="SBQQ__UpliftAmount__c")
+	decimal(4) SBQQ__UpliftAmount__c = 0;
+	@(readProp="#productCode", displayName="Product Code", flex="1", isVisible="true", source="ProductCode", uiOrder="4")
+	string productCode = this.getProperty("#productCode");
+	@(column="Minimum_Amount__c")
+	decimal(4) minUnitPrice = [0..MAX_DECIMAL];
+	@(column="Maximum_Amount__c")
+	decimal(4) maxUnitPrice = [0..MAX_DECIMAL];
+	string unitPriceMsg = "W;unitPrice;"+productDescription+" unit price must be between "+minUnitPrice+" and "+maxUnitPrice;
+	decimal(4) unitCost = [0..MAX_DECIMAL];
+	string productId = this.getProperty("#productId");
+	decimal(4) revenue = (cycle=="MONTHLY")?(unitPrice*quantity*12):(unitPrice*quantity);
+	decimal(4) cost = (cycle=="MONTHLY")?(unitCost*quantity*12):(unitCost*quantity);
+	decimal(4) rentRevenue = (ownership=="Rent")?revenue:0;
+	decimal(4) rentCost = (ownership=="Rent")?cost:0;
+	decimal(4) purchaseRevenue = (ownership=="Rent")?0:revenue;
+	decimal(4) purchaseCost = (ownership=="Rent")?0:cost;
+	int HomeCurrencyProductCount = (HomeCurrencyProduct!=true)?0:1;
+	//US307480
+	int VisaInstallmentProductCount = (VisaInstallmentProduct!=true)?0:1;
+	//US314574
+	//START : US302801
+	string frontEndError = "E;"+productDescription+" is an invalid solution for the "+Front_End_Vendor__c+" Front End Vendor.";
+	//END : US302801
+	//START : US302804 & US302927
+	string usdErrorMsg = "E;"+productDescription+" can only be ordered for CAD currency application.";
+	string cadErrorMsg = "E;"+productDescription+" can only be ordered for USD currency application.";
+
+	//END : US302804 & US302927
+	@(userKeys="productId")
+	preference(table(productId,unitCost,SalesforceHashTable("SBQQ__Cost__c","SBQQ__Product__c","SBQQ__UnitCost__c","SBQQ__Product__r.velocpq__modelid__c = :modelId")));
+
+	message(Owner_Geography__c=="Canada"&&Front_End_Vendor__c=="North"&&FrontEndVendorEquip=="GSAP",frontEndError);
+	message(Owner_Geography__c=="Canada"&&Front_End_Vendor__c=="East"&&FrontEndVendorEquip=="GNAP",frontEndError);
+	message(Owner_Geography__c=="Canada"&&MOSS_Currency_Indicator__c=="CAD"&&BillingCurrencyEqPlan=="USD",cadErrorMsg);
+	message(Owner_Geography__c=="Canada"&&MOSS_Currency_Indicator__c=="USD"&&BillingCurrencyEqPlan=="CAD",usdErrorMsg);
+	message((minUnitPrice!=maxUnitPrice)&&((unitPrice<minUnitPrice)||(unitPrice>maxUnitPrice)),unitPriceMsg);
+}
+
+type CA_CATL00083_ORDI00581 : Equipment {
+	@(defaultvalue="")
+	string cycle;
+}
+
+@(split="true")
+type EquipmentPlan {
+	string pricebookId = SBQQ__PricebookId__c;
+	@(readProp="#description", displayName="Product Description", isVisible="true", uiOrder="0")
+	string productDescription = this.getProperty("#description");
+	@(isEditable="true", mapToField="SBQQ__ListPrice__c", defaultValueLoader="defaultValueHashTableLoader", userKeys="pricebookId, productCode", displayName="List Price", column="UnitPrice", width="100", source="DEFAULT_UNIT_PRICE", isVisible="true", align="right", uiOrder="3")
+	decimal(4) unitPrice = [0..MAX_DECIMAL];
+	decimal(4) unitCost = [0..MAX_DECIMAL];
+	@(mapToField="SBQQ__ComponentCost__c")
+	decimal(4) SBQQ__ComponentCost__c = 0;
+	@(mapToField="SBQQ__ComponentListTotal__c")
+	decimal(4) SBQQ__ComponentListTotal__c = 0;
+	@(mapToField="SBQQ__ComponentTotal__c")
+	decimal(4) SBQQ__ComponentTotal__c = 0;
+	@(mapToField="SBQQ__CustomerPrice__c")
+	decimal(4) SBQQ__CustomerPrice__c = 0;
+	@(mapToField="SBQQ__NetPrice__c")
+	decimal(4) SBQQ__NetPrice__c = 0;
+	@(mapToField="SBQQ__PartnerPrice__c")
+	decimal(4) SBQQ__PartnerPrice__c = 0;
+	@(mapToField="SBQQ__ProrateMultiplier__c")
+	decimal(4) SBQQ__ProrateMultiplier__c = 1;
+	@(mapToField="SBQQ__ProratedListPrice__c")
+	decimal(4) SBQQ__ProratedListPrice__c = 0;
+	@(mapToField="SBQQ__ProratedPrice__c")
+	decimal(4) SBQQ__ProratedPrice__c = 0;
+	@(mapToField="SBQQ__RegularPrice__c")
+	decimal(4) SBQQ__RegularPrice__c = 0;
+	@(mapToField="SBQQ__SpecialPrice__c")
+	decimal(4) SBQQ__SpecialPrice__c = 0;
+	@(mapToField="SBQQ__UpliftAmount__c")
+	decimal(4) SBQQ__UpliftAmount__c = 0;
+	@(displayName="Product Code", source="ProductCode", isVisible="true", uiOrder="4")
+	string productCode = this.getProperty("#productCode");
+	@(column="Minimum_Amount__c")
+	decimal(4) minUnitPrice = [0..MAX_DECIMAL];
+	@(column="Maximum_Amount__c")
+	decimal(4) maxUnitPrice = [0..MAX_DECIMAL];
+	@(column="Front_End_Vendor__c")
+	string frontEndVendorEqPlan = ["","GNAP","GSAP"];
+	//US302801
+	@(column="Billing_Currency__c")
+	string billingCurrencyEqPlan = ["","USD","CAD","N/A"];
+	//US302804 & US302927
+	string unitPriceMsg = productDescription+" unit price must be between "+minUnitPrice+" and "+maxUnitPrice;
+	@(displayName="Cycle", column="Cycle__c", width="140", defaultvalue="", isVisible="true", uiOrder="1")
+	string cycle = ["","ANNUAL","MONTHLY","QUARTERLY","ONE TIME","PER OCCURRENCE","PER ITEM"];
+	@(mapToField="SBQQ__Quantity__c", displayName="Quantity", width="100", defaultvalue="1", isVisible="true", isDisabled="true", align="right", configurable="true", uiOrder="2")
+	int quantity = [0..MAX_INT];
+	int parentQuantity = parent(quantity);
+	string productId = this.getProperty("#productId");
+	decimal(4) revenue = (cycle=="MONTHLY")?(unitPrice*quantity*12):(unitPrice*quantity);
+	decimal(4) cost = (cycle=="MONTHLY")?(unitCost*quantity*12):(unitCost*quantity);
+
+	constraint(minUnitPrice>0->unitPrice>=minUnitPrice,unitPriceMsg);
+	constraint(maxUnitPrice>0->unitPrice<=maxUnitPrice,unitPriceMsg);
+	constraint(quantity==parentQuantity);
+
+	@(userKeys="productId")
+	preference(table(productId,unitCost,SalesforceHashTable("SBQQ__Cost__c","SBQQ__Product__c","SBQQ__UnitCost__c","SBQQ__Product__r.velocpq__modelid__c = :modelId")));
+}
+
+type CA_CATL00062_ORDI02514_RATT00017 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02514_RATT00744 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02892_RATT00731 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02892_RATT00732 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02893_RATT00731 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02893_RATT00733 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02952_RATT00412 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02952_RATT00757 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02952_RATT00758 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02953_RATT00412 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02953_RATT00757 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02953_RATT00758 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02954_RATT00412 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02954_RATT00759 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02954_RATT00760 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02989_RATT00761 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02990_RATT00764 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02993_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02993_RATT00731 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02993_RATT00733 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02994_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02994_RATT00731 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02994_RATT00733 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02995_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02995_RATT00731 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02995_RATT00733 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02996_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02996_RATT00731 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02996_RATT00732 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02997_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02997_RATT00731 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02997_RATT00732 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02281_RATT00502 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02281_RATT00505 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02370_RATT00462 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02370_RATT00471 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02433_RATT00502 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02433_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02434_RATT00502 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02434_RATT00504 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02436_RATT00502 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02436_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02467_RATT00502 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02467_RATT00730 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02469_RATT00502 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02469_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02471_RATT00502 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02471_RATT00504 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02471_RATT00730 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02473_RATT00502 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02473_RATT00505 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02473_RATT00730 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02486_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02486_RATT00512 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02487_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02487_RATT00512 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02488_RATT00507 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02488_RATT00512 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02489_RATT00506 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02489_RATT00512 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02491_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02491_RATT00512 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02492_RATT00507 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02492_RATT00512 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02492_RATT00730 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02493_RATT00506 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02493_RATT00512 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02493_RATT00730 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02494_RATT00512 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02494_RATT00730 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02650_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02650_RATT00512 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02653_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02653_RATT00512 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02657_RATT00502 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02657_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02868_RATT00470 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02868_RATT00724 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02869_RATT00468 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02869_RATT00727 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02875_RATT00470 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02875_RATT00724 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02876_RATT00468 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02876_RATT00727 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02878_RATT00472 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02878_RATT00724 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02879_RATT00471 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02879_RATT00727 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02880_RATT00471 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02880_RATT00727 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02881_RATT00472 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02881_RATT00724 : EquipmentPlan {}
+
+type CA_CATL00078_ORDI01670_RATT00354 : EquipmentPlan {}
+
+type CA_CATL00078_ORDI01671_RATT00354 : EquipmentPlan {}
+
+type CA_CATL00078_ORDI01670_RATT00370 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02561_RATT00363 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02561_RATT00550 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02562_RATT00363 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02562_RATT00551 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02863_RATT00551 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02863_RATT00697 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02864_RATT00550 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02864_RATT00697 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02419_RATT00497 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02419_RATT00500 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02420_RATT00498 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02420_RATT00500 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02421_RATT00499 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02421_RATT00500 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02904_RATT00550 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02904_RATT00743 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02905_RATT00550 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02905_RATT00743 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02906_RATT00551 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02906_RATT00743 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02908_RATT00551 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02908_RATT00743 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02998_RATT00732 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02998_RATT00731 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02998_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03278_RATT00750 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03279_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00078_ORDI01670_RATT00369 : EquipmentPlan {}
+
+type CA_CATL00078_ORDI01671_RATT00369 : EquipmentPlan {}
+
+type CA_CATL00078_ORDI01671_RATT00370 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02067 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02067_RATT00401 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02067_RATT00402 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02067_RATT00412 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02068 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02068_RATT00401 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02068_RATT00402 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02068_RATT00412 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02660 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02660_RATT00502 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02660_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI03142 : EquipmentWithPlan {}
+
+type CA_CATL00290_ORDI03142_RATT00835 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI03142_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI03142_RATT00839 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI03141 : EquipmentWithPlan {}
+
+type CA_CATL00290_ORDI03141_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI03141_RATT00838 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI03146 : EquipmentWithPlan {}
+
+type CA_CATL00290_ORDI03155_RATT00837 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI03155_RATT00839 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI03146_RATT00839 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI03146_RATT00837 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI03145 : EquipmentWithPlan {}
+
+type CA_CATL00290_ORDI03145_RATT00836 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI03145_RATT00838 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI03144 : EquipmentWithPlan {}
+
+type CA_CATL00290_ORDI03144_RATT00835 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI03144_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI03144_RATT00839 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI03143 : EquipmentWithPlan {}
+
+type CA_CATL00290_ORDI03143_RATT00831 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI03143_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI03143_RATT00838 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03130 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI03130_RATT00808 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03130_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02374 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02374_RATT00462 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02374_RATT00472 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03131 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI03131_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03131_RATT00807 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02376 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02376_RATT00462 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02376_RATT00472 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03127 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI03127_RATT00807 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03127_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03126 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI03126_RATT00808 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI03126_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03129 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI03129_RATT00807 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03129_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03128 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI03128_RATT00808 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03128_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02371 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02371_RATT00462 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02371_RATT00471 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02371_RATT00464 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02372 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02372_RATT00462 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02372_RATT00471 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03237 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI03237_RATT00219 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03237_RATT00860 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03237_RATT00412 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03238 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI03238_RATT00860 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03238_RATT00219 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03238_RATT00412 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02380 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02380_RATT00494 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02380_RATT00495 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02379 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02379_RATT00494 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02379_RATT00495 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI03154 : EquipmentWithPlan {}
+
+type CA_CATL00290_ORDI03154_RATT00836 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI03154_RATT00838 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03280 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI03280_RATT00750 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03280_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02078 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02078_RATT00486 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02078_RATT00487 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02078_RATT00415 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02078_RATT00416 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02078_RATT00412 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03907_RATT01113 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03907_RATT01114 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03907_RATT01115 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02077 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI03907 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI03908 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI03908_RATT01113 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03908_RATT01114 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03908_RATT01115 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03905 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI03905_RATT01113 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03905_RATT01114 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03905_RATT01115 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03906 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI03906_RATT01113 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03906_RATT01114 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03906_RATT01115 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02077_RATT00486 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02077_RATT00487 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02077_RATT00416 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02077_RATT00415 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02077_RATT00412 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03090 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI03090_RATT00807 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03090_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02378 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02378_RATT00472 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02378_RATT00462 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02378_RATT00488 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02373 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02373_RATT00471 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02373_RATT00464 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02373_RATT00462 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02375 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02375_RATT00472 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02375_RATT00462 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02375_RATT00488 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03082 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI03082_RATT00808 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03082_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03081 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI03081_RATT00808 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03081_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03080 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI03080_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03080_RATT00808 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03089 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI03089_RATT00807 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03089_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03088 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI03088_RATT00807 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03088_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI01750 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI01750_RATT00394 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI01750_RATT00373 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02165 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02165_RATT00363 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02165_RATT00438 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02415 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02415_RATT00372 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02415_RATT00373 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02416 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02416_RATT00394 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI02416_RATT00373 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI03067 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI03067_RATT00799 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI03067_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI03069 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI03069_RATT00799 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI03069_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI03068 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI03068_RATT00799 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI03068_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02955 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02955_RATT00412 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02955_RATT00759 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02955_RATT00760 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI03059 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI03059_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI03059_RATT00800 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI01676 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI01676_RATT00373 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI01676_RATT00372 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI03058 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI03058_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI03058_RATT00800 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI03057 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI03057_RATT00800 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI03057_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02944 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02944_RATT00753 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02944_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02943 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02943_RATT00753 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02943_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02945 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02945_RATT00753 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02945_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02939 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02939_RATT00750 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02939_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI01371 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI01371_RATT00364 : EquipmentPlan {}
+
+type CA_CATL00067_ORDI01371_RATT00363 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02917 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02917_RATT00750 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02917_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02916 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02916_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI02916_RATT00750 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03277 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI03277_RATT00754 : EquipmentPlan {}
+
+type CA_CATL00062_ORDI03277_RATT00753 : EquipmentPlan {}
+
+//US366975
+type CA_CATL00290_ORDI04130 : EquipmentWithPlan {}
+
+type CA_CATL00290_ORDI04130_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI04130_RATT00835 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI04130_RATT00839 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI04131 : EquipmentWithPlan {}
+
+type CA_CATL00290_ORDI04131_RATT00839 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI04131_RATT00835 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI04131_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI04132 : EquipmentWithPlan {}
+
+type CA_CATL00290_ORDI04132_RATT00839 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI04132_RATT00835 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI04132_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI04133 : EquipmentWithPlan {}
+
+type CA_CATL00290_ORDI04133_RATT00839 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI04133_RATT00835 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI04133_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI04129 : EquipmentWithPlan {}
+
+type CA_CATL00290_ORDI04129_RATT00838 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI04129_RATT00831 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI04129_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI04128 : EquipmentWithPlan {}
+
+type CA_CATL00290_ORDI04128_RATT00838 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI04128_RATT00831 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI04128_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI04127 : EquipmentWithPlan {}
+
+type CA_CATL00290_ORDI04127_RATT00838 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI04127_RATT00831 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI04127_RATT00503 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI04126 : EquipmentWithPlan {}
+
+type CA_CATL00290_ORDI04126_RATT00838 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI04126_RATT00831 : EquipmentPlan {}
+
+type CA_CATL00290_ORDI04126_RATT00503 : EquipmentPlan {}
+
+//US366975
+@(split="true", defaultComponentLoader="defaultProductLoader", source="DEFAULT_DISCOUNT", isChildEditable="true")
+type EquipmentWithPlan : Equipment {
+	decimal(4) EquipmentPlanRevenue = EquipmentPlans.totalPlanRevenue;
+	decimal(4) EquipmentPlanCost = EquipmentPlans.totalPlanCost;
+
+	@(disableCardinalityConstraint="true")
+	port EquipmentPlans : EquipmentPlan [0..100] {
+		totalPlanRevenue = sum(revenue);
+		totalPlanCost = sum(cost);
+	}
+
+}
+
+type EquipmentWithPlanNoParentPricing : EquipmentWithPlan {
+	string unitPriceEditRestrictMsg = "List Price of '"+productDescription+"' is not editable. Please edit the price of child products if required.";
+
+	constraint(unitPrice==0,unitPriceEditRestrictMsg);
+}
+
+type CA_CATL00062_ORDI03279 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI03278 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02514 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02892 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02893 : EquipmentWithPlan {
+	@(defaultvalue="")
+	string cycle;
+}
+
+type CA_CATL00062_ORDI02952 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02953 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02954 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02989 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02990 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02993 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02994 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02995 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02996 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02997 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02281 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02370 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02433 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02434 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02436 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02467 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02469 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02471 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02473 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02486 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02487 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02488 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02489 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02491 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02492 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02493 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02494 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02650 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02653 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02657 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02868 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02869 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02875 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02876 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02878 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02879 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02880 : EquipmentWithPlan {}
+
+type CA_CATL00067_ORDI02881 : EquipmentWithPlan {}
+
+type CA_CATL00078_ORDI01670 : EquipmentWithPlan {
+	preference(Front_End_Vendor__c!="North"->EquipmentPlans[CA_CATL00078_ORDI01670_RATT00354]==0&&EquipmentPlans[CA_CATL00078_ORDI01670_RATT00370]==0&&EquipmentPlans[CA_CATL00078_ORDI01670_RATT00369]==0,"E2EE Products are only available for North Host Setup");
+}
+
+type CA_CATL00078_ORDI01671 : EquipmentWithPlan {
+	preference(Front_End_Vendor__c!="North"->EquipmentPlans[CA_CATL00078_ORDI01671_RATT00354]==0&&EquipmentPlans[CA_CATL00078_ORDI01671_RATT00370]==0&&EquipmentPlans[CA_CATL00078_ORDI01671_RATT00369]==0,"E2EE Products are only available for North Host Setup");
+}
+
+type CA_CATL00062_ORDI02561 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02562 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02863 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02864 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02419 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02420 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02421 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02904 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02905 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02906 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02908 : EquipmentWithPlan {}
+
+type CA_CATL00062_ORDI02998 : EquipmentWithPlan {}
+
+//type CA_CATL00062_ORDI02894 : EquipmentWithPlan {} //US263305, US320189
+@(split="true")
+type DialIP {
+	@(mapToField="SBQQ__ListPrice__c")
+	decimal(4) SBQQ__ListPrice__c = 0;
+	@(mapToField="SBQQ__ComponentCost__c")
+	decimal(4) SBQQ__ComponentCost__c = 0;
+	@(mapToField="SBQQ__ComponentListTotal__c")
+	decimal(4) SBQQ__ComponentListTotal__c = 0;
+	@(mapToField="SBQQ__ComponentTotal__c")
+	decimal(4) SBQQ__ComponentTotal__c = 0;
+	@(mapToField="SBQQ__CustomerPrice__c")
+	decimal(4) SBQQ__CustomerPrice__c = 0;
+	@(mapToField="SBQQ__NetPrice__c")
+	decimal(4) SBQQ__NetPrice__c = 0;
+	@(mapToField="SBQQ__PartnerPrice__c")
+	decimal(4) SBQQ__PartnerPrice__c = 0;
+	@(mapToField="SBQQ__ProrateMultiplier__c")
+	decimal(4) SBQQ__ProrateMultiplier__c = 1;
+	@(mapToField="SBQQ__ProratedListPrice__c")
+	decimal(4) SBQQ__ProratedListPrice__c = 0;
+	@(mapToField="SBQQ__ProratedPrice__c")
+	decimal(4) SBQQ__ProratedPrice__c = 0;
+	@(mapToField="SBQQ__RegularPrice__c")
+	decimal(4) SBQQ__RegularPrice__c = 0;
+	@(mapToField="SBQQ__SpecialPrice__c")
+	decimal(4) SBQQ__SpecialPrice__c = 0;
+	@(mapToField="SBQQ__UpliftAmount__c")
+	decimal(4) SBQQ__UpliftAmount__c = 0;
+	@(readProp="#productName", displayName="Product Name", isVisible="true", uiOrder="0")
+	string productDescription = this.getProperty("#description");
+	@(isEditable="true", displayName="% of Transactions", defaultvalue="0", isVisible="true", uiOrder="1")
+	decimal(4) percentageOfTransactions;
+	@(displayName="Product Code", source="ProductCode", isVisible="true", uiOrder="2")
+	string productCode = this.getProperty("#productCode");
+	@(defaultvalue="1.5")
+	decimal(4) discountPI = [0..5];
+	@(defaultvalue="0.1")
+	decimal(4) costDiscountPI = [0..10];
+	int totalAnnualTransactions = parent(totalAnnualTransactions);
+	decimal(4) revenue = totalAnnualTransactions*discountPI*percentageOfTransactions/100;
+	decimal(4) cost = totalAnnualTransactions*costDiscountPI*percentageOfTransactions/100;
+
+	@(userKeys="productCode, CurrencyIsoCode, Owner_Geography__c")
+	preference(table(productCode,CurrencyIsoCode,Owner_Geography__c,costDiscountPI,SalesforceHashTable("Pricing_Cost_Assumption__c","ProductCode__c, CurrencyIsoCode, Region__c","Rate_Factor__c","ProductClass__c = 'DialIP'")));
+}
+
+type DialUp_can : DialIP {}
+
+type IP_can : DialIP {}
+
+@(split="true")
+type OtherProtocol {
+	@(mapToField="SBQQ__ListPrice__c")
+	decimal(4) SBQQ__ListPrice__c = 0;
+	@(mapToField="SBQQ__ComponentCost__c")
+	decimal(4) SBQQ__ComponentCost__c = 0;
+	@(mapToField="SBQQ__ComponentListTotal__c")
+	decimal(4) SBQQ__ComponentListTotal__c = 0;
+	@(mapToField="SBQQ__ComponentTotal__c")
+	decimal(4) SBQQ__ComponentTotal__c = 0;
+	@(mapToField="SBQQ__CustomerPrice__c")
+	decimal(4) SBQQ__CustomerPrice__c = 0;
+	@(mapToField="SBQQ__NetPrice__c")
+	decimal(4) SBQQ__NetPrice__c = 0;
+	@(mapToField="SBQQ__PartnerPrice__c")
+	decimal(4) SBQQ__PartnerPrice__c = 0;
+	@(mapToField="SBQQ__ProrateMultiplier__c")
+	decimal(4) SBQQ__ProrateMultiplier__c = 1;
+	@(mapToField="SBQQ__ProratedListPrice__c")
+	decimal(4) SBQQ__ProratedListPrice__c = 0;
+	@(mapToField="SBQQ__ProratedPrice__c")
+	decimal(4) SBQQ__ProratedPrice__c = 0;
+	@(mapToField="SBQQ__RegularPrice__c")
+	decimal(4) SBQQ__RegularPrice__c = 0;
+	@(mapToField="SBQQ__SpecialPrice__c")
+	decimal(4) SBQQ__SpecialPrice__c = 0;
+	@(mapToField="SBQQ__UpliftAmount__c")
+	decimal(4) SBQQ__UpliftAmount__c = 0;
+	@(readProp="#productName", displayName="Product Name", isVisible="true", uiOrder="0")
+	string productDescription = this.getProperty("#description");
+	@(isEditable="true", displayName="% of Transactions", defaultvalue="20", isVisible="true", uiOrder="1")
+	decimal(2) percentageOfTransactions;
+	@(displayName="Product Code", source="ProductCode", isVisible="true", uiOrder="2")
+	string productCode = this.getProperty("#productCode");
+	int totalAnnualTransactions = parent(totalAnnualTransactions);
+	@(defaultvalue="0.1")
+	decimal(4) discountPI = [0..5];
+	decimal(4) revenue = totalAnnualTransactions*percentageOfTransactions*discountPI/100;
+}
+
+type authnet_can : OtherProtocol {}
+
+type realex_can : OtherProtocol {}
+
+@(split="true")
+type NonGlobalCardPlan {
+	@(mapToField="SBQQ__ListPrice__c")
+	decimal(4) SBQQ__ListPrice__c = 0;
+	@(mapToField="SBQQ__ComponentCost__c")
+	decimal(4) SBQQ__ComponentCost__c = 0;
+	@(mapToField="SBQQ__ComponentListTotal__c")
+	decimal(4) SBQQ__ComponentListTotal__c = 0;
+	@(mapToField="SBQQ__ComponentTotal__c")
+	decimal(4) SBQQ__ComponentTotal__c = 0;
+	@(mapToField="SBQQ__CustomerPrice__c")
+	decimal(4) SBQQ__CustomerPrice__c = 0;
+	@(mapToField="SBQQ__NetPrice__c")
+	decimal(4) SBQQ__NetPrice__c = 0;
+	@(mapToField="SBQQ__PartnerPrice__c")
+	decimal(4) SBQQ__PartnerPrice__c = 0;
+	@(mapToField="SBQQ__ProrateMultiplier__c")
+	decimal(4) SBQQ__ProrateMultiplier__c = 1;
+	@(mapToField="SBQQ__ProratedListPrice__c")
+	decimal(4) SBQQ__ProratedListPrice__c = 0;
+	@(mapToField="SBQQ__ProratedPrice__c")
+	decimal(4) SBQQ__ProratedPrice__c = 0;
+	@(mapToField="SBQQ__RegularPrice__c")
+	decimal(4) SBQQ__RegularPrice__c = 0;
+	@(mapToField="SBQQ__SpecialPrice__c")
+	decimal(4) SBQQ__SpecialPrice__c = 0;
+	@(mapToField="SBQQ__UpliftAmount__c")
+	decimal(4) SBQQ__UpliftAmount__c = 0;
+	string bundleId = parent(bundleId);
+	string productId = this.getProperty("#productId");
+	@(readProp="#description", displayName="Product Description", flex="1", isVisible="true", uiOrder="0")
+	string productDescription = this.getProperty("#description");
+	int totalAnnualTransactions = parent(totalAnnualTransactions);
+	@(mapToField="Disc_PI__c", isEditable="true", displayName="Discount PI", defaultValueLoader="defaultValueHashTableLoader", userKeys="bundleId,productId", column="Disc_PI__c", isVisible="true", source="DEFAULT_DISCOUNT", align="right", uiOrder="1")
+	decimal(4) discountPI = [0..5];
+	@(mapToField="External_Merchant_ID__c", isEditable="true", displayName="External Merchant ID", flex="1", isVisible="true", align="right", customValidator="pattern:INTEGER", uiOrder="2")
+	string externalMerchantId;
+	boolean externalMerchantIdLengthWrong = strlen(externalMerchantId)>10;
+	//US263260
+	@(isRequired="true", isEditable="true", preventNullValue="true", displayName="Clearance Indicator", flex="1", isSelect="true", isVisible="true", uiOrder="3")
+	string CA_Clearance_Indicator = ["New - Pre confirmed","Existing Member - To be confirmed","Existing Member- pre- confirmed","Existing Member- pre confirmed"];
+	@(displayName="% Returns", defaultvalue="0")
+	decimal(2) returnsPercentage = [0..100];
+	string pricingMethod = parent(pricingMethod);
+	decimal(6) totalPercent = (pricingMethod=="Plus Return")?(1+returnsPercentage/100):((pricingMethod=="Zero Return")?1:(1-returnsPercentage/100));
+	decimal(4) revenue = (totalAnnualTransactions*discountPI)*totalPercent;
+
+	constraint(Owner_Geography__c=="Canada"&&CA_Clearance_Indicator=="New - Pre confirmed"->(externalMerchantId==null||externalMerchantId==""),"Card Type Cannot have a Merchant# when the confirmation indicator is of type 'New'");
+
+	//US263260 starts
+	message(externalMerchantIdLengthWrong==true,"ERR#09;External Merchant ID field must be 10 Characters");
+	message(Owner_Geography__c=="Canada"&&(CA_Clearance_Indicator=="Existing Member - To be confirmed"||CA_Clearance_Indicator=="Existing Member- pre confirmed"||CA_Clearance_Indicator=="Existing Member- pre- confirmed")&&(externalMerchantId==null||externalMerchantId==""),"E;External Merchant ID is required for Non-Global Card Plans with Existing Members");
+}
+
+type CA_AMEX_ESA : NonGlobalCardPlan {
+	string CA_Clearance_Indicator = ["Existing Member - To be confirmed"];
+
+	constraint(Owner_Geography__c=="Canada"->CA_Clearance_Indicator=="Existing Member - To be confirmed","Non-Global AMEX card plan Clearance Indicator must be Existing Member - To be confirmed");
+}
+
+type CA_JCB_ESA : NonGlobalCardPlan {
+	string CA_Clearance_Indicator = ["Existing Member - To be confirmed"];
+
+	constraint(Owner_Geography__c=="Canada"->CA_Clearance_Indicator=="Existing Member - To be confirmed","Non-Global JCB card plan Clearance Indicator must be Existing Member - To be confirmed");
+}
+
+type CA_EIGEN_ESA : NonGlobalCardPlan {
+	string CA_Clearance_Indicator = ["New - Pre confirmed"];
+
+	constraint(Owner_Geography__c=="Canada"->CA_Clearance_Indicator=="New - Pre confirmed","Non-Global Eigen card plan Clearance Indicator must be New-Pre-confirmed");
+}
+
+type CA_PL_ESA : NonGlobalCardPlan {
+	string CA_Clearance_Indicator = ["New - Pre confirmed","Existing Member- pre confirmed"];
+
+	message(Owner_Geography__c=="Canada"&&CA_Clearance_Indicator=="Existing Member - To be confirmed"&&externalMerchantId==null,"External Merchant ID is required when Private Label Card Type Clearance Indicator is 'Existing Merchant - Pre Confirmed");
+}
+
+@(split="true", defaultComponentLoader="defaultProductLoader", source="DEFAULT_DISCOUNT")
+type CABundle {
+	@(mapToQuote="P_L_Data__c")
+	string pnlDataId;
+	string bundleName;
+	string bundleId = this.getProperty("#productId");
+	string Filter_Category;
+	string pricingMethod = ["Plus Return","Zero Return","Minus Return"];
+	@(mapToField="SBQQ__ListPrice__c")
+	decimal(4) SBQQ__ListPrice__c = 0;
+	@(mapToField="SBQQ__ComponentCost__c")
+	decimal(4) SBQQ__ComponentCost__c = 0;
+	@(mapToField="SBQQ__ComponentListTotal__c")
+	decimal(4) SBQQ__ComponentListTotal__c = 0;
+	@(mapToField="SBQQ__ComponentTotal__c")
+	decimal(4) SBQQ__ComponentTotal__c = 0;
+	@(mapToField="SBQQ__CustomerPrice__c")
+	decimal(4) SBQQ__CustomerPrice__c = 0;
+	@(mapToField="SBQQ__NetPrice__c")
+	decimal(4) SBQQ__NetPrice__c = 0;
+	@(mapToField="SBQQ__PartnerPrice__c")
+	decimal(4) SBQQ__PartnerPrice__c = 0;
+	@(mapToField="SBQQ__ProrateMultiplier__c")
+	decimal(4) SBQQ__ProrateMultiplier__c = 1;
+	@(mapToField="SBQQ__ProratedListPrice__c")
+	decimal(4) SBQQ__ProratedListPrice__c = 0;
+	@(mapToField="SBQQ__ProratedPrice__c")
+	decimal(4) SBQQ__ProratedPrice__c = 0;
+	@(mapToField="SBQQ__RegularPrice__c")
+	decimal(4) SBQQ__RegularPrice__c = 0;
+	@(mapToField="SBQQ__SpecialPrice__c")
+	decimal(4) SBQQ__SpecialPrice__c = 0;
+	@(mapToField="SBQQ__UpliftAmount__c")
+	decimal(4) SBQQ__UpliftAmount__c = 0;
+	string MCCParent = MCCDomian;
+	date todayDate = today();
+	@(displayName="Annual Sales", groupId="0", uiFormat="decimal", isVisible="true", mapToQuote="Annual_Card_Sales_Volume__c", uiOrder="3")
+	decimal(4) totalAnnualSales = CardTypes.totalSales;
+	@(displayName="Annual Transactions", groupId="0", uiFormat="integer", isVisible="true", uiOrder="4")
+	int totalAnnualTransactions = CardTypes.totalTransactions;
+	@(isEditable="true", mapToField="Channel_Type__c", propagateDown="true", displayName="Channel Type", groupId="1", isVisible="true", uiOrder="0")
+	string channelType = CHANNEL_TYPES;
+	@(isEditable="true", mapToField="IDF_Table_Series__c", propagateDown="true", displayName="IDF Table Series", groupId="1", isVisible="true", uiOrder="1")
+	string iDFTableSeries = IDF_TABLE_SERIES;
+	@(profitability="true", isEditable="true", mapToField="IDF_Table__c", propagateDown="true", displayName="IDF Table (ATF)", groupId="1", isVisible="true", mapToQuote="IDF_Table__c", uiOrder="2")
+	string iDFTable = IDF_TABLES;
+	@(profitability="true", displayName="Merchant Cost", uiFormat="currency", mapToQuote="Merchant_Cost__c")
+	decimal(4) merchantCost = totalRevenue+CardTypes.totalICGCost;
+	@(profitability="true", displayName="Credit Spread", uiFormat="percentage", mapToQuote="Credit_Spread__c")
+	decimal(4) creditSpread = (CardTypes.totalCreditNetRevenue/CardTypes.totalCreditSales)*100;
+	@(profitability="true", displayName="Total Revenue", uiFormat="currency", mapToQuote="Total_Revenue__c")
+	decimal(4) totalRevenue = CardTypes.totalCreditNetRevenue+AssessmentFees.assessmentFeeTotalRevenue+CardTypes.totalDebitNetRevenue+NonGlobalCardPlans.planTotalRevenue+Fees.feeTotalRevenue+Equipments.equipmentRevenue+Equipments.equipmentPlanRevenue+DialIPs.totalDialRevenue+OtherProtocols.totalProtocolRevenue;
+	@(profitability="true", displayName="Net Revenue BP", uiFormat="percentage", mapToQuote="Net_Revenue_BP__c")
+	decimal(4) netRevenueBP = netRevenue*100/CardTypes.totalCreditSales;
+	decimal(4) annualDebitCardSalesVolume = CardTypes.totalDebitSales;
+	decimal(4) commission = netRevenue*COMMISSIONRATE/100;
+	decimal(4) locationMonthlyCost = Locations__c*(HELPDESK+ACCOUNTMAINTENANCE+SECURITY)*12;
+	decimal(4) locationOneTimeCost = Contract_Term__c*ACCOUNTOPENING;
+	@(profitability="true", displayName="Net Revenue", uiFormat="currency", mapToQuote="Net_Revenue__c")
+	decimal(4) netRevenue = totalRevenue-revenueCost;
+	@(mapToQuote="Credit_Net_Sales__c")
+	decimal(4) CreditNetSales = CardTypes.totalCreditNetSales;
+	@(mapToQuote="Net_Discount_Revenue__c")
+	decimal(4) netDiscountRevenue = CardTypes.totalCreditNetRevenue;
+	@(profitability="true", displayName="Contribution", uiFormat="currency", mapToQuote="Contribution__c")
+	decimal(4) contribution = netRevenue-otherCost;
+	@(profitability="true", displayName="Equipment Revenue", uiFormat="currency", mapToQuote="Equipment_Revenue__c")
+	decimal(4) equipmentTotalRevenue = Equipments.equipmentRevenue+Equipments.equipmentPlanRevenue;
+	@(profitability="true", displayName="Contribution Margin", uiFormat="decimal", mapToQuote="Contribution_Margin__c")
+	decimal(4) contributionMargin = contribution/totalRevenue;
+	@(profitability="true", displayName="Fee Revenue", uiFormat="currency", mapToQuote="Net_Fee_Revenue__c")
+	decimal(4) feesTotalRevenue = Fees.feeTotalRevenue;
+	@(profitability="true", displayName="Annual Interac Debit Card Sales Volume", uiFormat="currency", mapToQuote="Annual_Interac_Debit_Card_Sales_Volume__c")
+	decimal(4) cardTypesInteracCardAnnualSales = CardTypes.interacCardAnnualSales;
+	@(profitability="true", displayName="Annual Credit Card Sales Volume", uiFormat="currency", mapToQuote="Annual_Credit_Card_Sales_Volume__c")
+	decimal(4) cardTypesTotalCreditSales = CardTypes.totalSales-CardTypes.totalDebitSales;
+	@(profitability="true", displayName="Interac Annual Transaction Count", uiFormat="integer", mapToQuote="Interac_Annual_Transaction__c")
+	int cardTypesInteracCardAnnualTransactions = CardTypes.interacCardAnnualTransactions;
+	@(profitability="true", displayName="Annual Debit Card Sales Volume", uiFormat="currency", mapToQuote="Annual_Debit_Card_Sales_Volume__c")
+	decimal(4) cardTypesTotalDebitSales = CardTypes.totalDebitSales-CardTypes.interacCardAnnualSales;
+	@(mapToQuote="Credit_Sales__c")
+	decimal(4) CreditSales = CardTypes.totalCreditSales;
+	@(mapToQuote="Credit_Returns__c")
+	decimal(4) CreditReturns = CardTypes.totalCreditReturns;
+	@(mapToQuote="IDP_Fee__c")
+	decimal(4) IDPFee = AssessmentFees.IDPFeeTotalRevenue;
+	@(mapToQuote="Interac_PI__c")
+	decimal(4) InteracPI = [0..MAX_DECIMAL];
+	@(mapToQuote="MC_License_Fee__c")
+	decimal(4) MCLicenseFee = [0..MAX_DECIMAL];
+	@(mapToQuote="POS_Setup_Cost__c")
+	decimal(4) posSetupCost = equipmentCount*POSSETUP;
+	@(mapToQuote="Rented_Terminal__c")
+	int RentedTerminal = [0..MAX_INT];
+	@(mapToQuote="Purchased_Terminal__c")
+	int PurchasedTerminal = [0..MAX_INT];
+	@(mapToQuote="Terminal_Maintenance__c")
+	decimal(4) terminalMaintenance = equipmentCount*TERMINALMAINTENANCE*12;
+	@(mapToQuote="Terminal_COGS__c")
+	decimal(4) TerminalCOGS = [0..MAX_DECIMAL];
+	@(mapToQuote="Terminal_Depreciation__c")
+	decimal(4) TerminalDepreciationPerMonth = [0..MAX_DECIMAL];
+	@(mapToQuote="Terminal_Sales__c")
+	decimal(4) TerminalSales = [0..MAX_DECIMAL];
+	@(mapToQuote="Terminal_Maintenance_Rate__c")
+	decimal(4) TerminalMaintenanceRate = TERMINALMAINTENANCE;
+	@(mapToQuote="Terminal_Depreciation__c")
+	decimal(4) TerminalDepreciation = [0..MAX_DECIMAL];
+	@(mapToQuote="Terminal_Rent__c")
+	decimal(4) TerminalRent = [0..MAX_DECIMAL];
+	@(mapToQuote="Account_Opening_Rate__c")
+	decimal(4) AccountOpeningRate = ACCOUNTOPENING;
+	decimal(4) locationOneTimeCosts = Contract_Term__c*ACCOUNTOPENING;
+	@(mapToQuote="Account_Maintenance_Rate__c")
+	decimal(4) AccountMaintenanceRate = ACCOUNTMAINTENANCE;
+	decimal(4) locationMonthlyCosts = Locations__c*(HELPDESK+ACCOUNTMAINTENANCE+SECURITY)*12;
+	@(mapToQuote="Cost_of_Funds__c")
+	decimal(4) costofFunds = (CardTypes.totalCreditNetRevenue/365)*COSTOFFUNDRATE/100;
+	@(mapToQuote="Cost_of_Funds_Percent__c")
+	decimal(4) CostofFundsPercent = COSTOFFUNDRATE;
+	@(mapToQuote="PCI_Fee__c")
+	decimal(4) PCIFee = [0..MAX_DECIMAL];
+	@(mapToQuote="Percent_Commissions__c")
+	decimal(4) PercentCommissions = COMMISSIONRATE;
+	@(mapToQuote="Commissions__c")
+	decimal(4) commissions = netRevenue*COMMISSIONRATE/100;
+	@(mapToQuote="Transaction_Processing_Factor__c")
+	decimal(4) TransactionProcessingFactor = TXPROCESSRATE;
+	@(mapToQuote="Transaction_Processing__c")
+	decimal(4) transactionProcessing = totalAnnualTransactions*TXPROCESSRATE;
+	@(mapToQuote="Subtotal_Expenses__c")
+	decimal(4) SubtotalExpenses = [0..MAX_DECIMAL];
+	@(mapToQuote="Communication_Cost__c")
+	decimal(4) CommunicationCost = [0..MAX_DECIMAL];
+	@(mapToQuote="Annual_Location_Fee__c")
+	decimal(4) AnnualLocationFee = [0..MAX_DECIMAL];
+	@(mapToQuote="Quarterly_Location_Fee__c")
+	decimal(4) QuarterlyLocationFee = [0..MAX_DECIMAL];
+	@(mapToQuote="Monthly_Location_Fee__c")
+	decimal(4) MonthlyLocationFee = [0..MAX_DECIMAL];
+	@(mapToQuote="One_Time_Location_Fee__c")
+	decimal(4) OneTimeLocationFee = [0..MAX_DECIMAL];
+	@(mapToQuote="Per_Occurrence_Location_Fee__c")
+	decimal(4) PerOccurrenceLocationFee = [0..MAX_DECIMAL];
+	@(mapToQuote="Per_Location_Annual_Fee__c")
+	decimal(4) PerLocationAnnualFee = [0..MAX_DECIMAL];
+	@(mapToQuote="Per_Location_Quarterly_Fee__c")
+	decimal(4) PerLocationQuarterlyFee = [0..MAX_DECIMAL];
+	@(mapToQuote="Per_Location_Monthly_Fee__c")
+	decimal(4) PerLocationMonthlyFee = [0..MAX_DECIMAL];
+	@(mapToQuote="Per_Location_One_Time_Fee__c")
+	decimal(4) PerLocationOneTimeFee = [0..MAX_DECIMAL];
+	@(mapToQuote="Per_Location_Per_Occurrence_Fee__c")
+	decimal(4) PerLocationPerOccurrenceFee = [0..MAX_DECIMAL];
+	@(mapToQuote="XB_Assessment_Cost__c")
+	decimal(4) XBAssessmentCost = [0..MAX_DECIMAL];
+	@(mapToQuote="XB_CDN_Assessments__c")
+	decimal(4) XBCDNAssessments = [0..MAX_DECIMAL];
+	@(mapToQuote="XB_assessments__c")
+	decimal(4) XBassessments = [0..MAX_DECIMAL];
+	@(mapToQuote="Assessments__c")
+	decimal(4) Assessments = [0..MAX_DECIMAL];
+	@(mapToQuote="XB_INTL_Assessments__c")
+	decimal(4) XBINTLAssessments = [0..MAX_DECIMAL];
+	decimal(4) revenueCost = AssessmentFees.assessmentFeeTotalCost+DialIPs.totalDialCost+transactionProcessing;
+	@(configurable="false")
+	int equipmentCount;
+	decimal(4) otherCost = Equipments.equipmentTotalCost+Equipments.equipmentPlanCost+costofFunds+commissions+locationMonthlyCosts+locationOneTimeCosts+terminalMaintenance+posSetupCost+Fees.totalOneTimeRelationshipCost;
+	decimal(4) equipmentRentRevenue = Equipments.equipmentTotalRentRevenue;
+	decimal(4) equipmentRentCost = Equipments.equipmentTotalRentCost;
+	decimal(4) equipmentPurchaseRevenue = Equipments.equipmentTotalPurchaseRevenue;
+	decimal(4) equipmentPurchaseCost = Equipments.equipmentTotalPurchaseCost;
+	decimal(4) annualFee = Fees.totalAnnualFee;
+	decimal(4) quarterlyFee = Fees.totalQuarterlyFee;
+	decimal(4) monthlyFee = Fees.totalMonthlyFee;
+	decimal(4) onetimeFee = Fees.totalOneTimeFee;
+	decimal(4) occurrenceFee = Fees.totalOccurrenceFee;
+	decimal(4) itemFee = Fees.totalItemFee;
+	@(mapToQuote="Year_2_Anual_growth_rate__c")
+	decimal(4) Year_2_Anual_growth_rate__c = y2Growthrate;
+	@(mapToQuote="Year_3_Anual_growth_rate__c")
+	decimal(4) Year_3_Anual_growth_rate__c = y3Growthrate;
+
+	@(controlOrder="010", singleton="true", groupOrder="010", sequence="1", saveOriginalOrder="true", groupId="cardTypes", domainComputation="true", controlLabel="Card Types", priceOptions="true", PropagateUp="true")
+	port CardTypes : CardType [0..20] (visa_credit_can, visa_debit_can, visa_corp_can, mastercard_credit_can, mastercard_debit_can, mc_corp_can, interac_can, discover_can, discover_comm_can, discover_comm_can_usd, amex_optblue_can, jcb_optblue_can, china_up_can) {
+		totalSales = sum(annualSales);
+		totalTransactions = sum(annualTransactions);
+		totalCreditSales = sum(creditSales);
+		totalCreditTransactions = sum(creditTransactions);
+		totalCreditReturns = sum(totalCreditReturns);
+		totalCreditNetSales = sum(creditNetSales);
+		totalCreditNetRevenue = sum(creditNetRevenue);
+		totalICGCost = sum(creditICGCost);
+		totalDebitSales = sum(debitSales);
+		totalDebitTransactions = sum(debitTransactions);
+		totalDebitNetRevenue = sum(debitNetRevenue);
+		visaCardAnnualSales = sum(VisaCard.annualSales);
+		visaCardAnnualXBSales = sum(VisaCard.annualXBSales);
+		visaCardAnnualXBTransactions = sum(VisaCard.annualTransactions);
+		masterCardAnnualSales = sum(MasterCard.annualSales);
+		masterCardAnnualTransactions = sum(MasterCard.annualTransactions);
+		masterCardAnnualXBSales = sum(MasterCard.annualXBSales);
+		masterCardAnnualXBTransactions = sum(MasterCard.annualTransactions);
+		discoveryCardAnnualSales = sum(DiscoveryCard.annualSales);
+		discoveryCardAnnualXBSales = sum(DiscoveryCard.annualXBSales);
+		discoveryCardXBAnnualTransactions = sum(DiscoveryCard.annualTransactions);
+		interacCardAnnualSales = sum(interac_can.annualSales);
+		interacCardAnnualTransactions = sum(interac_can.annualTransactions);
+		jcbCardAnnualSales = sum(jcb_optblue_can.annualSales);
+		jcbCardCNPAnnualSales = sum(jcb_optblue_can.annualCNPSales);
+		amexCardAnnualSales = sum(amex_optblue_can.annualSales);
+		amexCardAnnualXBSales = sum(amex_optblue_can.annualXBSales);
+		amexCardCNPAnnualSales = sum(amex_optblue_can.annualCNPSales);
+	}
+
+	@(controlOrder="020", groupOrder="010", sequence="7", groupId="cardTypes", priceOptions="true", controlLabel="Non Global Card Plans", PropagateUp="true")
+	port NonGlobalCardPlans : NonGlobalCardPlan [0..500] {
+		planTotalRevenue = sum(revenue);
+	}
+
+	@(controlOrder="030", singleton="true", groupOrder="010", sequence="2", groupId="cardTypes", domainComputation="true", controlLabel="Assessment Fee", priceOptions="true", PropagateUp="true", isDisabledForEngine="true")
+	port AssessmentFees : AssessmentFee [0..500] {
+		assessmentFeeTotalRevenue = sum(revenue);
+		assessmentFeeTotalCost = sum(cost);
+		visa_assessment_canTotalRevenue = sum(visa_assessment_can.revenue);
+		mastercard_assessment_canTotalRevenue = sum(mastercard_assessment_can.revenue);
+		amex_optblue_assessment_canTotalRevenue = sum(amex_optblue_assessment_can.revenue);
+		JCB_optblue_network_canTotalRevenue = sum(JCB_optblue_network_can.revenue);
+		mastercard_license_fee_canTotalRevenue = sum(mastercard_license_fee_can.revenue);
+		discover_assessment_canTotalRevenue = sum(discover_assessment_can.revenue);
+		IDPFeeTotalRevenue = sum(IDP_network_fee_can.revenue);
+		amex_optblue_cnp_canDiscountrate = sum(amex_optblue_cnp_can.discountRate);
+		JCB_optblue_cnp_canDiscountrate = sum(JCB_optblue_cnp_can.discountRate);
+	}
+
+	@(controlOrder="010", groupOrder="020", sequence="3", isChildEditable="true", dynamicOptionFilter="Included_Bundles", groupId="otherFees", controlLabel="Fees", priceOptions="true", PropagateUp="true")
+	port Fees : BaseFee [0..500] {
+		feeTotalRevenue = sum(revenue);
+		totalAnnualFee = sum(annualFee);
+		totalQuarterlyFee = sum(quarterlyFee);
+		totalMonthlyFee = sum(monthlyFee);
+		totalOneTimeFee = sum(onetimeFee);
+		totalOccurrenceFee = sum(occurrenceFee);
+		totalItemFee = sum(itemFee);
+		totalOneTimeRelationshipCost = sum(OneTimeRelationshipFee.unitPrice);
+	}
+
+	@(controlOrder="010", groupOrder="030", isChildEditable="true", sequence="4", dynamicOptionFilter="Included_Bundles", groupId="solutions", domainComputation="true", controlLabel="Solutions", priceOptions="true", PropagateUp="true")
+	port Equipments : Equipment [0..500] {
+		equipHomecurrPay = sum(HomeCurrencyProductCount);
+		//US303279
+		equipVisaInst = sum(VisaInstallmentProductCount);
+		//US314574
+		equipmentRevenue = sum(revenue);
+		equipmentPlanRevenue = sum(EquipmentWithPlan.EquipmentPlanRevenue);
+		equipmentTotalCost = sum(cost);
+		equipmentPlanCost = sum(EquipmentWithPlan.EquipmentPlanCost);
+		equipmentTotalRentRevenue = sum(rentRevenue);
+		equipmentTotalRentCost = sum(rentCost);
+		equipmentTotalPurchaseRevenue = sum(purchaseRevenue);
+		equipmentTotalPurchaseCost = sum(purchaseCost);
+	}
+
+	@(controlOrder="030", groupOrder="030", sequence="5", groupId="solutions", priceOptions="true", controlLabel="Dial/IP", PropagateUp="true")
+	port DialIPs : DialIP [0..100] {
+		totalDialIPPercentage = sum(percentageOfTransactions);
+		totalDialRevenue = sum(revenue);
+		totalDialCost = sum(cost);
+		DialUpPercentage = sum(DialUp_can.percentageOfTransactions);
+		IPPercentage = sum(IP_can.percentageOfTransactions);
+	}
+
+	@(controlOrder="040", groupOrder="030", sequence="6", groupId="solutions", isSingleSelect="true", priceOptions="true", controlLabel="Other Protocols", PropagateUp="true")
+	port OtherProtocols : OtherProtocol [0..100] {
+		totalProtocolPercentage = sum(percentageOfTransactions);
+		totalProtocolRevenue = sum(revenue);
+	}
+
+	constraint(equipmentCount==Equipments[Equipment]);
+	constraint(Owner_Geography__c=="Canada"&&CardTypes[amex_optblue_can]>0->AssessmentFees[amex_optblue_assessment_can]>0&&AssessmentFees[amex_optblue_cnp_can]>0&&AssessmentFees[amex_optblue_xb_assessments_can]>0);
+	constraint(Owner_Geography__c=="Canada"&&CardTypes[discover_can]>0->AssessmentFees[discover_xb_intl_can]>0&&AssessmentFees[discover_assessment_can]>0);
+	constraint(Owner_Geography__c=="Canada"&&CardTypes[interac_can]>0->AssessmentFees[IDP_network_fee_can]>0);
+	constraint(Owner_Geography__c=="Canada"&&MOSS_Currency_Indicator__c=="CAD"&&(CardTypes[visa_credit_can]>0||CardTypes[mastercard_credit_can]>0)->AssessmentFees[tax_reimbursement_fee]>0);
+	constraint(Owner_Geography__c=="Canada"&&MOSS_Currency_Indicator__c=="USD"&&(CardTypes[visa_credit_can]>0||CardTypes[mastercard_credit_can]>0)->AssessmentFees[tax_reimbursement_fee]>0);
+	//DE112687
+	constraint(Owner_Geography__c=="Canada"&&MOSS_Currency_Indicator__c=="CAD"&&(CardTypes[visa_credit_can]==0||CardTypes[mastercard_credit_can]==0)->AssessmentFees[tax_reimbursement_fee]==0);
+	constraint(Owner_Geography__c=="Canada"&&MOSS_Currency_Indicator__c=="USD"&&(CardTypes[visa_credit_can]==0||CardTypes[mastercard_credit_can]==0)->AssessmentFees[tax_reimbursement_fee]==0);
+	//DE112687
+	//start US391531
+	constraint(Owner_Geography__c=="Canada"&&MOSS_Currency_Indicator__c=="CAD"&&(CardTypes[visa_credit_can]>0)->AssessmentFees[visa_non_emv_pos_usage_fee]>0);
+	constraint(Owner_Geography__c=="Canada"&&MOSS_Currency_Indicator__c=="USD"&&(CardTypes[visa_credit_can]>0)->AssessmentFees[visa_non_emv_pos_usage_fee]>0);
+	constraint(Owner_Geography__c=="Canada"&&MOSS_Currency_Indicator__c=="CAD"&&(CardTypes[visa_credit_can]==0)->AssessmentFees[visa_non_emv_pos_usage_fee]==0);
+	constraint(Owner_Geography__c=="Canada"&&MOSS_Currency_Indicator__c=="USD"&&(CardTypes[visa_credit_can]==0)->AssessmentFees[visa_non_emv_pos_usage_fee]==0);
+	//end US391531
+	constraint(Owner_Geography__c=="Canada"&&MOSS_Currency_Indicator__c=="CAD"&&CardTypes[mastercard_credit_can]>0->AssessmentFees[mastercard_xb_intl_can]>0&&AssessmentFees[mastercard_xb_cdn_can]>0&&AssessmentFees[mastercard_assessment_can]>0&&AssessmentFees[mastercard_license_fee_can]>0&&AssessmentFees[MC_Procss_Integrity_can]>0&&AssessmentFees[MC_Procss_Integrity_can]>0&&AssessmentFees[MC_Procss_min_can]>0&&AssessmentFees[MC_preauth_PI_can]>0&&AssessmentFees[MC_PExcess_auth_can]>0&&AssessmentFees[MC_PNominal_amt_can]>0&&AssessmentFees[mastercard_data_usage_fee_can]>0);
+	constraint(Owner_Geography__c=="Canada"&&MOSS_Currency_Indicator__c=="CAD"&&CardTypes[visa_credit_can]>0->AssessmentFees[visa_assessment_can]>0&&AssessmentFees[visa_xb_assessment_can]>0&&AssessmentFees[visa_xb_intl_can]>0&&AssessmentFees[VS_SIF_C1D]>0&&AssessmentFees[VS_SIF_C1X]>0&&AssessmentFees[VSSIFC2C4D]>0&&AssessmentFees[VSSIFC2C4X]>0&&AssessmentFees[VS_SIF_C3D]>0&&AssessmentFees[VS_SIF_C3X]>0&&AssessmentFees[VS_DCF_DOM]>0&&AssessmentFees[VS_DCF_XB]>0&&AssessmentFees[Visa_Infrastructure_Fee]>0,"Visa credit requires related assessment fees");
+	constraint(Owner_Geography__c=="Canada"&&MOSS_Currency_Indicator__c=="CAD"&&CardTypes[visa_credit_can]==0->AssessmentFees[visa_assessment_can]==0&&AssessmentFees[visa_xb_assessment_can]==0&&AssessmentFees[visa_xb_intl_can]==0&&AssessmentFees[VS_SIF_C1D]==0&&AssessmentFees[VS_SIF_C1X]==0&&AssessmentFees[VSSIFC2C4D]==0&&AssessmentFees[VSSIFC2C4X]==0&&AssessmentFees[VS_SIF_C3D]==0&&AssessmentFees[VS_SIF_C3X]==0&&AssessmentFees[VS_DCF_DOM]==0&&AssessmentFees[VS_DCF_XB]==0&&AssessmentFees[Visa_Infrastructure_Fee]==0,"Visa related fees are not available without visa credit card");
+	constraint(Owner_Geography__c=="Canada"&&MOSS_Currency_Indicator__c=="USD"&&CardTypes[visa_credit_can]>0->AssessmentFees[visa_assessment_can]>0&&AssessmentFees[visa_xb_assessment_can]>0&&AssessmentFees[visa_xb_intl_can]>0&&AssessmentFees[VS_SIF_C1D_USD]>0&&AssessmentFees[VS_SIF_C1X_USD]>0&&AssessmentFees[VSSIFC2C4D_USD]>0&&AssessmentFees[VSSIFC2C4X_USD]>0&&AssessmentFees[VS_SIF_C3D_USD]>0&&AssessmentFees[VS_SIF_C3X_USD]>0&&AssessmentFees[VS_DCF_DOM_USD]>0&&AssessmentFees[VS_DCF_XB_USD]>0&&AssessmentFees[Visa_Infrastructure_Fee]>0,"Visa credit requires related assessment fees");
+	constraint(Owner_Geography__c=="Canada"&&MOSS_Currency_Indicator__c=="USD"&&CardTypes[visa_credit_can]==0->AssessmentFees[visa_assessment_can]==0&&AssessmentFees[visa_xb_assessment_can]==0&&AssessmentFees[visa_xb_intl_can]==0&&AssessmentFees[VS_SIF_C1D_USD]==0&&AssessmentFees[VS_SIF_C1X_USD]==0&&AssessmentFees[VSSIFC2C4D_USD]==0&&AssessmentFees[VSSIFC2C4X_USD]==0&&AssessmentFees[VS_SIF_C3D_USD]==0&&AssessmentFees[VS_SIF_C3X_USD]==0&&AssessmentFees[VS_DCF_DOM_USD]==0&&AssessmentFees[VS_DCF_XB_USD]==0&&AssessmentFees[Visa_Infrastructure_Fee]==0,"Visa related fees are not available without visa credit card");
+	constraint(Owner_Geography__c=="Canada"&&MOSS_Currency_Indicator__c=="CAD"->AssessmentFees[VS_SIF_C1D_USD]==0&&AssessmentFees[VS_SIF_C1X_USD]==0&&AssessmentFees[VSSIFC2C4D_USD]==0&&AssessmentFees[VSSIFC2C4X_USD]==0&&AssessmentFees[VS_SIF_C3D_USD]==0&&AssessmentFees[VS_SIF_C3X_USD]==0&&AssessmentFees[VS_DCF_DOM_USD]==0&&AssessmentFees[VS_DCF_XB_USD]==0,"USD related products are not available with CAD currency");
+	constraint(Owner_Geography__c=="Canada"&&MOSS_Currency_Indicator__c=="USD"->AssessmentFees[VS_SIF_C1D]==0&&AssessmentFees[VS_SIF_C1X]==0&&AssessmentFees[VSSIFC2C4D]==0&&AssessmentFees[VSSIFC2C4X]==0&&AssessmentFees[VS_SIF_C3D]==0&&AssessmentFees[VS_SIF_C3X]==0&&AssessmentFees[VS_DCF_DOM]==0&&AssessmentFees[VS_DCF_XB]==0,"CAD related products are not available with USD currency");
+	constraint(Owner_Geography__c=="Canada"&&CardTypes[amex_optblue_can]==0->AssessmentFees[amex_optblue_assessment_can]==0&&AssessmentFees[amex_optblue_cnp_can]==0&&AssessmentFees[amex_optblue_xb_assessments_can]==0,"Amex related fees are not available without Amex");
+	constraint(Owner_Geography__c=="Canada"&&NonGlobalCardPlans[CA_AMEX_ESA]==0->NonGlobalCardPlans[CA_JCB_ESA]==0,"Auto deselect JCB NonGlobal when Amex NonGlobal is deselected");
+	constraint(Owner_Geography__c=="Canada"&&CardTypes[jcb_optblue_can]>0->AssessmentFees[JCB_optblue_cnp_can]>0&&AssessmentFees[JCB_optblue_network_can]>0,"JCB OptBlue requires JCB OptBlue related fees");
+	constraint(Owner_Geography__c=="Canada"&&NonGlobalCardPlans[CA_AMEX_ESA]>0->NonGlobalCardPlans[CA_JCB_ESA]>0,"Auto select JCB NonGlobal when Amex NonGlobal is selected");
+	constraint(Owner_Geography__c=="Canada"&&MOSS_Currency_Indicator__c=="USD"&&CardTypes[mastercard_credit_can]>0->AssessmentFees[mastercard_xb_intl_can]>0&&AssessmentFees[mastercard_xb_cdn_can]>0&&AssessmentFees[mastercard_assessment_can]>0&&AssessmentFees[mastercard_license_fee_can]>0&&AssessmentFees[MC_Procss_Integrity_can]>0&&AssessmentFees[MC_Procss_min_can_usd]>0&&AssessmentFees[MC_preauth_PI_can_usd]>0&&AssessmentFees[MC_PExcess_auth_can_usd]>0&&AssessmentFees[MC_PNominal_amt_can_usd]>0&&AssessmentFees[mastercard_data_usage_fee_can]>0,"Master credit card requires master card related fees");
+	constraint(Owner_Geography__c=="Canada"&&MOSS_Currency_Indicator__c=="CAD"->CardTypes[discover_comm_can_usd]==0,"discover_comm_can_usd is not available in Canada with CAD");
+	constraint(Owner_Geography__c=="Canada"&&MOSS_Currency_Indicator__c=="CAD"->AssessmentFees[MC_Procss_min_can_usd]==0&&AssessmentFees[MC_preauth_PI_can_usd]==0&&AssessmentFees[MC_PExcess_auth_can_usd]==0&&AssessmentFees[MC_PNominal_amt_can_usd]==0,"USD related products are not available with CAD currency");
+	constraint(Owner_Geography__c=="Canada"&&MOSS_Currency_Indicator__c=="USD"->AssessmentFees[MC_Procss_min_can]==0&&AssessmentFees[MC_preauth_PI_can]==0&&AssessmentFees[MC_PNominal_amt_can]==0&&AssessmentFees[MC_PExcess_auth_can]==0&&CardTypes[discover_comm_can]==0&&CardTypes[interac_can]==0&&CardTypes[china_up_can]==0&&CardTypes[amex_optblue_can]==0&&CardTypes[jcb_optblue_can]==0,"CAD related products are not available with USD currency");
+	constraint(Owner_Geography__c=="Canada"&&CardTypes[china_up_can]>0->CardTypes[interac_can]>0||CardTypes[visa_credit_can]>0||CardTypes[mastercard_credit_can]>0,"CUP card cannot be ordered without Visa Consumer or MasterCard Consumer or Interac card");
+	constraint(Owner_Geography__c=="Canada"&&CardTypes[mastercard_debit_can]>0->CardTypes[mastercard_credit_can]>0,"Debit MasterCard cannot be ordered without MasterCard Credit");
+	constraint(Owner_Geography__c=="Canada"->NonGlobalCardPlans[CA_EIGEN_ESA]>0^NonGlobalCardPlans[CA_PL_ESA]>0,"You cannot select Eigen and Private Label together");
+	constraint(Owner_Geography__c=="Canada"&&CardTypes[discover_can]==0->AssessmentFees[discover_xb_intl_can]==0&&AssessmentFees[discover_assessment_can]==0,"Discover related fees are not available without Discover");
+	constraint(Owner_Geography__c=="Canada"&&CardTypes[interac_can]==0->AssessmentFees[IDP_network_fee_can]==0,"IDP_network_fee_can requires interac_can");
+	constraint(Owner_Geography__c=="Canada"&&CardTypes[jcb_optblue_can]==0->AssessmentFees[JCB_optblue_cnp_can]==0&&AssessmentFees[JCB_optblue_network_can]==0);
+	constraint(Owner_Geography__c=="Canada"&&CardTypes[mastercard_credit_can]==0->AssessmentFees[mastercard_xb_intl_can]==0&&AssessmentFees[mastercard_xb_cdn_can]==0&&AssessmentFees[mastercard_assessment_can]==0&&AssessmentFees[mastercard_license_fee_can]==0&&AssessmentFees[MC_Procss_Integrity_can]==0&&AssessmentFees[MC_Procss_min_can]==0&&AssessmentFees[MC_Procss_min_can_usd]==0&&AssessmentFees[MC_preauth_PI_can]==0&&AssessmentFees[MC_preauth_PI_can_usd]==0&&AssessmentFees[MC_PExcess_auth_can]==0&&AssessmentFees[MC_PExcess_auth_can_usd]==0&&AssessmentFees[MC_PNominal_amt_can]==0&&AssessmentFees[MC_PNominal_amt_can_usd]==0&&AssessmentFees[mastercard_data_usage_fee_can]==0,"Master related fees are not available without master card");
+	constraint(Owner_Geography__c=="Canada"&&CardTypes[visa_credit_can]==0->AssessmentFees[visa_assessment_can]==0&&AssessmentFees[visa_xb_assessment_can]==0&&AssessmentFees[visa_xb_intl_can]==0&&AssessmentFees[VS_SIF_C1D]==0&&AssessmentFees[VS_SIF_C1X]==0&&AssessmentFees[VSSIFC2C4D]==0&&AssessmentFees[VSSIFC2C4X]==0&&AssessmentFees[VS_SIF_C3D]==0&&AssessmentFees[VS_SIF_C3X]==0&&AssessmentFees[VS_DCF_DOM]==0&&AssessmentFees[VS_DCF_XB]==0&&AssessmentFees[Visa_Infrastructure_Fee]==0,"Visa related fees are not available without visa credit card");
+
+	@(userKeys="MCC_Code__c")
+	preference(table(MCC_Code__c,MCCParent,SalesforceHashTable("Merchant_Category_Code__c","MCC_Code__c","MCC_Parent__c","MCC_Region__c = 'Canada'")));
+	preference(CardTypes[amex_optblue_can].discountPI==CardTypes[jcb_optblue_can].discountPI,"ERR#02;AMEX and JCB Discount PI should be same");
+	preference(CardTypes[amex_optblue_can].discountRate==CardTypes[jcb_optblue_can].discountRate,"ERR#01;AMEX and JCB Discount rates should be same");
+	preference(NonGlobalCardPlans[CA_AMEX_ESA].discountPI==NonGlobalCardPlans[CA_JCB_ESA].discountPI,"ERR#08;AMEX and JCB Discount PI should be the same");
+	preference(Owner_Geography__c=="Canada"&&What_AMEX_Cardtype_will_Merchant_Accept__c=="false"->NonGlobalCardPlans[CA_AMEX_ESA]>0&&NonGlobalCardPlans[CA_JCB_ESA]>0);
+	preference(Owner_Geography__c=="Canada"&&What_AMEX_Cardtype_will_Merchant_Accept__c=="true"->CardTypes[amex_optblue_can]>0&&NonGlobalCardPlans[CA_AMEX_ESA]==0&&NonGlobalCardPlans[CA_JCB_ESA]==0);
+	preference(Owner_Geography__c=="Canada"&&What_AMEX_Cardtype_will_Merchant_Accept__c=="NA"->NonGlobalCardPlans[CA_AMEX_ESA]==0);
+	preference(Owner_Geography__c=="Canada"&&CardTypes[amex_optblue_can]==0->CardTypes[jcb_optblue_can]==0,"Remove JCB if Amex is removed");
+	preference(Owner_Geography__c=="Canada"&&CardTypes[amex_optblue_can]>0->CardTypes[jcb_optblue_can]>0,"Amex and JCB should be selected together");
+	preference(Front_End_Vendor__c!="North"->Equipments[CA_CATL00078_ORDI01671]==0&&Equipments[CA_CATL00078_ORDI01670]==0&&Fees[CA_CATL00068_ORDI01673_RATT00370]==0&&Fees[CA_CATL00068_ORDI01672_RATT00369]==0,"E2EE Products are only available for North Host Setup");
+	//US263254 US263247 starts
+	preference(Owner_Geography__c=="Canada"&&CardTypes[interac_can]>0&&(internet>0||digitalEcommerce>0)->Fees[CA_CATL00068_ORDI02360]==1);
+	preference(Owner_Geography__c=="Canada"&&CardTypes[mastercard_credit_can]>0&&(internet>0||digitalEcommerce>0)->Fees[CA_CATL00068_ORDI02292]==1);
+	preference(Owner_Geography__c=="Canada"&&(internet>0||digitalEcommerce>0)&&CardTypes[interac_can]==0->Fees[CA_CATL00068_ORDI02360]==0);
+	//US307362 ends
+	preference(Owner_Geography__c=="Canada"&&LOB__c=="1000"&&Equipments.equipHomecurrPay>0->Fees[CA_CATL00086_ORDI01020]==1);
+	//US307480
+	preference(Owner_Geography__c=="Canada"&&Equipments.equipVisaInst>0->Fees[CA_CATL00086_ORDI03333]==1);
+	//US365032 & DE112683
+	//Start US351862
+	preference(Owner_Geography__c=="Canada"&&MOSS_Currency_Indicator__c=="CAD"&&Dispute_Letter_Delivery__c=="F"->Fees[CA_CATL00068_ORDI04063_RATT01171]==1);
+	preference(Owner_Geography__c=="Canada"&&MOSS_Currency_Indicator__c=="USD"&&Dispute_Letter_Delivery__c=="F"->Fees[CA_CATL00068_ORDI04099_RATT01171]==1);
+	//End US360307
+	//Start US351861
+	preference(Owner_Geography__c=="Canada"&&MOSS_Currency_Indicator__c=="CAD"&&Dispute_Letter_Delivery__c=="N"->Fees[CA_CATL00068_ORDI04062_RATT01170]==1);
+	preference(Owner_Geography__c=="Canada"&&MOSS_Currency_Indicator__c=="USD"&&Dispute_Letter_Delivery__c=="N"->Fees[CA_CATL00068_ORDI04100_RATT01170]==1);
+	//End US351861
+	//Start US368826
+	preference(Owner_Geography__c=="Canada"&&Dispute_Letter_Delivery__c=="Y"->Fees[CA_CATL00086_ORDI02513]==1);
+
+	message(Owner_Geography__c=="Canada"&&CardTypes[interac_can]==0&&Fees[CA_CATL00068_ORDI02360]==1,"E;The INTERAC IN-APP Assessment Fee can only be applied when the Interac card type is selected.");
+	message(Owner_Geography__c=="Canada"&&CardTypes[mastercard_credit_can]==0&&Fees[CA_CATL00068_ORDI02292]==1,"E;MC Digital E-Commerce Fee can only be applied when the Mastercard card type is selected");
+	//feedback change
+	message(Owner_Geography__c=="Canada"&&(internet>0||digitalEcommerce>0)&&CardTypes[mastercard_credit_can]>0&&Fees[CA_CATL00068_ORDI02292]==0,"E;MC Digital E-Commerce Fee is mandatory for MasterCard E-Commerce merchant.");
+	message(Owner_Geography__c=="Canada"&&(internet>0||digitalEcommerce>0)&&CardTypes[interac_can]>0&&Fees[CA_CATL00068_ORDI02360]==0,"E;INTERAC IN-APP ASSESSMENT Fee is mandatory for Interac E-Commerce merchant");
+	// feedback change
+	//US263254 US263247 ends
+	message(Owner_Geography__c=="Canada"&&What_AMEX_Cardtype_will_Merchant_Accept__c=="false"&&NonGlobalCardPlans[CA_AMEX_ESA]==0,"E;Amex Non Global Card Plan is required when AMEX ESA is selected on the Opportunity");
+	message(Owner_Geography__c=="Canada"&&What_AMEX_Cardtype_will_Merchant_Accept__c=="true"&&CardTypes[amex_optblue_can]==0,"E;Amex Credit Card Type is required when AMEX OptBlue is selected on the Opportunity");
+	message(Owner_Geography__c=="Canada"&&What_AMEX_Cardtype_will_Merchant_Accept__c=="NA"&&(CardTypes[amex_optblue_can]>0||NonGlobalCardPlans[CA_AMEX_ESA]>0),"E;No Amex Credit Card Type or Amex Non Global Card Plans are allowed when No AMEX is selected on the Opportunity");
+	message(Owner_Geography__c=="Canada"&&CardTypes[amex_optblue_can]>0&&NonGlobalCardPlans[CA_AMEX_ESA]>0,"E;Invalid combination of Global and Non-Global AMEX cards");
+	message(Owner_Geography__c=="Canada"&&CardTypes[jcb_optblue_can]>0&&NonGlobalCardPlans[CA_JCB_ESA]>0,"E;Invalid combination of Global and Non-Global JCB cards");
+	message(OtherProtocols.totalProtocolPercentage>100||DialIPs.totalDialIPPercentage>100||DialIPs.totalDialIPPercentage+OtherProtocols.totalProtocolPercentage>100,"Percent of transaction of Protocols should not be greater than 100");
+	//US263306 starts
+	message(Owner_Geography__c=="Canada"&&Front_End_Vendor__c=="East"&&CardTypes[china_up_can]>0&&CardTypes[discover_can]==0,"E;Discover is required when a UnionPay card is selected when Front End Vendor is East");
+	//US263306 ends
+	//Commented below two line as part of US263305
+	//message(Owner_Geography__c=="Canada"&&CardTypes[interac_can]==0&&Equipments[CA_CATL00062_ORDI02894]==1, "E;Interac card type is required when selecting GPR OLO/Guest App");   //US263305
+	//message(Owner_Geography__c=="Canada"&&internet==0&&Equipments[CA_CATL00062_ORDI02894]==1, "E;Internet % must be greater than 0 when selecting GPR OLO/Guest App");             //US263305
+	//US307362 starts
+	message(Owner_Geography__c=="Canada"&&LOB__c=="2000"&&(Fees[CA_CATL00086_ORDI02495]==1||Fees[CA_CATL00086_ORDI02518]==1||Fees[CA_CATL00086_ORDI02517]==1||Fees[CA_CATL00086_ORDI01020]==1),"E;This Line of Business does not support Home Currency Pay");
+	//US303279
+	message(Owner_Geography__c=="Canada"&&(Fees[CA_CATL00086_ORDI01020]==1||Fees[CA_CATL00086_ORDI02518]==1||Fees[CA_CATL00086_ORDI02495]==1||Fees[CA_CATL00086_ORDI02517]==1)&&Equipments.equipHomecurrPay==0,"W;Please verify if Home Currency Pay can be applied to this merchant");
+	//US307518
+	message(Owner_Geography__c=="Canada"&&Equipments.equipHomecurrPay!=0&&Fees[CA_CATL00086_ORDI01020]==0&&Fees[CA_CATL00086_ORDI02517]==0,"W;Please verify if HCP should be applied to this merchant");
+	//US314574
+	message(Owner_Geography__c=="Canada"&&(Equipments.equipVisaInst!=0&&Fees[CA_CATL00086_ORDI03333]==0)||(Equipments.equipVisaInst==0&&Fees[CA_CATL00086_ORDI03333]==1),"W;Please verify if Visa Installment should be applied to this merchant.");
+	//US314578
+	message(Owner_Geography__c=="Canada"&&bundleName=="100% Card-Present Flat Rate"&&(digitalEcommerce>0||internet>0||mOTO>0),"E;The selected product bundle is only compatible with 100% Face to Face Sales Profile. Please verify the Sales Profile on Transaction Profile Tab");
+	message(CloseDate<todayDate&&(!(StageName=="Closed Won"&&(Sub_Stage__c=="Pended"||Sub_Stage__c==null))),"ERR#10; Opportunity Close Date cannot be in the past. Please update Close Date to today's date or a future date");
+	message(Owner_Geography__c=="Canada"&&Dispute_Letter_Delivery__c=="F"&&MOSS_Currency_Indicator__c=="CAD"&&Fees[CA_CATL00068_ORDI04063_RATT01171]==0,"E;DISPUTES FAX (69AB) Fee is required when Dispute Letter Delivery method is Fax");
+	message(Owner_Geography__c=="Canada"&&Dispute_Letter_Delivery__c=="F"&&MOSS_Currency_Indicator__c=="USD"&&Fees[CA_CATL00068_ORDI04099_RATT01171]==0,"E;DISPUTES FAX (69AB) Fee is required when Dispute Letter Delivery method is Fax");
+	message(Owner_Geography__c=="Canada"&&Dispute_Letter_Delivery__c=="F"&&Fees[CA_CATL00068_ORDI04062_RATT01170]==1,"E;Cannot add DISPUTES MAIL (69AA) when Dispute Letter Delivery is Fax for Chargeback Contact");
+	message(Owner_Geography__c=="Canada"&&Dispute_Letter_Delivery__c=="F"&&Fees[CA_CATL00068_ORDI04100_RATT01170]==1,"E;Cannot add DISPUTES MAIL (69AA) when Dispute Letter Delivery is Fax for Chargeback Contact");
+	//End US351862
+	//Start US360307
+	message(Owner_Geography__c=="Canada"&&Dispute_Letter_Delivery__c=="Y"&&(Fees[CA_CATL00068_ORDI04063_RATT01171]==1||Fees[CA_CATL00068_ORDI04062_RATT01170]==1||Fees[CA_CATL00068_ORDI04100_RATT01170]==1||Fees[CA_CATL00068_ORDI04099_RATT01171]==1),"E;Cannot add Dispute Fees when Dispute Delivery Notification is Online");
+	message(Owner_Geography__c=="Canada"&&Dispute_Letter_Delivery__c=="N"&&MOSS_Currency_Indicator__c=="CAD"&&Fees[CA_CATL00068_ORDI04062_RATT01170]==0,"E;DISPUTES MAIL (69AA) Fee is required when Dispute Letter Delivery method is Mail");
+	message(Owner_Geography__c=="Canada"&&Dispute_Letter_Delivery__c=="N"&&MOSS_Currency_Indicator__c=="USD"&&Fees[CA_CATL00068_ORDI04100_RATT01170]==0,"E;DISPUTES MAIL (69AA) Fee is required when Dispute Letter Delivery method is Mail");
+	message(Owner_Geography__c=="Canada"&&Dispute_Letter_Delivery__c=="N"&&Fees[CA_CATL00068_ORDI04063_RATT01171]==1,"E;Cannot add DISPUTES FAX (69AB) when Dispute Letter Delivery is Mail for Chargeback Contact");
+	message(Owner_Geography__c=="Canada"&&Dispute_Letter_Delivery__c=="N"&&Fees[CA_CATL00068_ORDI04099_RATT01171]==1,"E;Cannot add DISPUTES FAX (69AB) when Dispute Letter Delivery is Mail for Chargeback Contact");
+	message(Owner_Geography__c=="Canada"&&Dispute_Letter_Delivery__c=="Y"&&Fees[CA_CATL00086_ORDI02513]==0,"E;MERCHANT PORTAL - CAD/USD is required when Dispute Letter Delivery Method is Online");
+}
+
+type NoneMPOSBundle : CABundle {
+	string[] mccCodes = MCC_CODES;
+	boolean interacselected = CardTypes[interac_can]>0;
+
+	constraint(Owner_Geography__c=="Canada"&&iDFTableSeries!="C - Corporate Cards"&&iDFTableSeries!="F - Corporate Cards"->CardTypes[mc_corp_can]==0&&CardTypes[visa_corp_can]==0);
+	constraint(Owner_Geography__c=="Canada"->CardTypes[visa_credit_can]>0||CardTypes[mastercard_credit_can]>0||CardTypes[interac_can]>0,"At least one Visa Consumer, MC Consumer or Interac Debit should be selected");
+	constraint(Owner_Geography__c=="Canada"&&CardTypes[discover_can]>0->CardTypes[visa_credit_can]>0||CardTypes[mastercard_credit_can]>0,"Global Discover card cannot be ordered without Visa Credit or Mastercard Credit");
+	constraint(Owner_Geography__c=="Canada"&&(iDFTableSeries=="C - Corporate Cards"||iDFTableSeries=="F - Corporate Cards")&&CardTypes[mc_corp_can]>0->CardTypes[mastercard_credit_can]>0,"MasterCard Corporate cannot be ordered without MasterCard Consumer");
+	constraint(Owner_Geography__c=="Canada"&&MOSS_Currency_Indicator__c=="USD"||CardTypes[mastercard_credit_can]==0->CardTypes[mc_corp_can]==0);
+	constraint(Owner_Geography__c=="Canada"&&MOSS_Currency_Indicator__c=="USD"||CardTypes[visa_credit_can]==0->CardTypes[visa_corp_can]==0);
+	constraint(Owner_Geography__c=="Canada"&&(iDFTableSeries=="C - Corporate Cards"||iDFTableSeries=="F - Corporate Cards")->CardTypes[mc_corp_can]>0&&CardTypes[visa_corp_can]>0);
+	constraint(Owner_Geography__c=="Canada"&&iDFTableSeries!="C - Corporate Cards"&&iDFTableSeries!="F - Corporate Cards"->CardTypes[mc_corp_can]==0&&CardTypes[visa_corp_can]==0);
+	constraint(Owner_Geography__c=="Canada"&&(iDFTableSeries=="C - Corporate Cards"||iDFTableSeries=="F - Corporate Cards")&&CardTypes[visa_corp_can]>0->CardTypes[visa_credit_can]>0,"VISA Corporate cannot be ordered without Visa Consumer");
+	constraint(Owner_Geography__c=="Canada"&&CardTypes[visa_debit_can]>0->CardTypes[visa_credit_can]>0,"Visa Debit cannot be ordered without Visa Credit");
+	constraint(Owner_Geography__c=="Canada"&&MOSS_Currency_Indicator__c=="USD"->Fees[CA_CATL00086_ORDI01020]==0,"USD only merchants cannot be setup with Home Currency Pay");
+	constraint(Owner_Geography__c=="Canada"&&MCC_Code__c in mccCodes->CardTypes[amex_optblue_can]==0&&CardTypes[jcb_optblue_can]==0);
+
+	preference(Owner_Geography__c=="Canada"&&CardTypes[jcb_optblue_can]>0->CardTypes[amex_optblue_can]>0);
+
+	message(Owner_Geography__c=="Canada"&&CardTypes[jcb_optblue_can]>0&&CardTypes[amex_optblue_can]==0,"JCB OptBlue card cannot be ordered without Amex Optblue");
+}
+
+type New_Merchant_Dynamic_Bundle_Canada_MDR : NoneMPOSBundle {
+	string bundleName = "MDR Bundle";
+	@(relatedAttributes="iDFTableSeries, iDFTable", domainComputation="true")
+	string channelType = CHANNEL_TYPES;
+	@(relatedAttributes="iDFTable", domainComputation="true")
+	string iDFTableSeries = IDF_TABLE_SERIES;
+	@(domainComputation="true")
+	string iDFTable = IDF_TABLES;
+	boolean skipSCG = false;
+
+	preference(table(bundleName,channelType,iDFTableSeries,iDFTable,SalesforceTable("IDF_Table_Selection__c")));
+}
+
+type New_Merchant_Dynamic_Bundle_Canada_IPlusDSR : NoneMPOSBundle {
+	string bundleName = "IPlus DSR Bundle";
+	string channelType = "For Iplus";
+	string iDFTableSeries = "Z-Iplus";
+	string iDFTable = "ZZ";
+	boolean skipSCG = false;
+}
+
+type New_Merchant_Dynamic_Bundle_Canada_IPlus : NoneMPOSBundle {
+	string bundleName = "IPlus Bundle";
+	string channelType = "For Iplus";
+	string iDFTableSeries = "Z-Iplus";
+	string iDFTable = "ZZ";
+	boolean skipSCG = false;
+}
+
+//US338483-Renamed MPOS with FlatRate
+type New_Merchant_Dynamic_Bundle_Global_FlatRate : CABundle {
+	string bundleName = "MPOS Bundle";
+	string channelType = "Small Business";
+	string iDFTableSeries = "N";
+	string iDFTable = "N";
+	boolean skipSCG = true;
+}
+
+//US338484 Added 100% Card Present Flat Rate
+type New_Merchant_Dynamic_Bundle_Global_100_Card_Present_FlatRate : CABundle {
+	string bundleName = "100% Card-Present Flat Rate";
+	string channelType = "Small Business";
+	string iDFTableSeries = "N";
+	string iDFTable = "N";
+	boolean skipSCG = true;
+}
